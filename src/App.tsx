@@ -1,54 +1,66 @@
-import { useMemo } from 'react';
+import { VehicleSelectionProvider, useVehicleSelection } from './context/VehicleSelectionContext';
+import { VehicleSelector } from './components/controls/VehicleSelector';
 import { KpiGrid } from './components/kpi/KpiGrid';
-import { FuelDonutChart } from './components/charts/FuelDonutChart';
-import { LineChartCard } from './components/charts/LineChartCard';
-import { useLatestVehicles } from './hooks/useLatestVehicles';
-import { useKpis } from './hooks/useKpis';
-import { useHistory } from './hooks/useHistory';
-import { LatestVehiclesTable } from './components/table/LatestVechicleTable';
+import { MultiLineChartCard } from './components/charts/MultiLineChartCard';
+import { ConsumptionChartCard } from './components/charts/ConsumptionChartCard';
+import { EventsPanel } from './components/events/EventsPanel';
+import { FuelLoadsTable } from './components/table/FuelLoadsTable';
+import { LowPerformanceTable } from './components/table/LowPerformanceTable';
+import { useFleetSummary } from './hooks/useFleetSummary';
+import { usePerformanceSeries } from './hooks/usePerformanceSeries';
+import { useConsumption } from './hooks/useConsumption';
+import { useFleetEvents } from './hooks/useFleetEvents';
+import { useFuelLoads } from './hooks/useFuelLoads';
+import { useLowPerformance } from './hooks/useLowPerformance';
 
-function App() {
-  const { vehicles, loading: loadingVehicles } = useLatestVehicles();
-  const { kpis } = useKpis();
-  const firstImei = vehicles[0]?.imei ?? null;
-  const { history } = useHistory(firstImei);
-
-  const historyData = useMemo(
-    () =>
-      history.map((h) => ({
-        time: new Date(h.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        speed: h.speed,
-        fuel: h.fuel,
-      })),
-    [history]
-  );
+function Dashboard() {
+  const { imeis } = useVehicleSelection();
+  const { summary } = useFleetSummary();
+  const { data: perf } = usePerformanceSeries(imeis);
+  const { data: consumption } = useConsumption(imeis);
+  const { events } = useFleetEvents(imeis);
+  const { loads } = useFuelLoads(imeis);
+  const { units } = useLowPerformance();
 
   return (
     <div className="min-h-screen bg-surface p-6 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Dashboard General</h1>
-        <p className="text-sm text-slate-400">Resumen de tu flota en tiempo real</p>
+      <header className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Dashboard General</h1>
+          <p className="text-sm text-slate-400">Resumen de tu flota en tiempo real</p>
+        </div>
+        <VehicleSelector />
       </header>
 
-      <KpiGrid kpis={kpis} vehicles={vehicles} />
+      <KpiGrid summary={summary} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <MultiLineChartCard
+          title="Rendimiento de la flota"
+          data={perf.series}
+          seriesKeys={perf.imeis}
+          yLabel="km / % fuel"
+        />
+        <ConsumptionChartCard data={consumption} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <LineChartCard
-            title={`Histórico ${firstImei ? `— ${firstImei}` : ''}`}
-            data={historyData}
-            xKey="time"
-            lines={[
-              { key: 'speed', color: '#3B82F6', name: 'Velocidad' },
-              { key: 'fuel', color: '#22C55E', name: 'Combustible' },
-            ]}
-          />
+          <FuelLoadsTable loads={loads} />
         </div>
-        <FuelDonutChart vehicles={vehicles} />
+        <EventsPanel events={events} />
       </div>
 
-      {!loadingVehicles && <LatestVehiclesTable vehicles={vehicles} />}
+      <LowPerformanceTable units={units} />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <VehicleSelectionProvider>
+      <Dashboard />
+    </VehicleSelectionProvider>
   );
 }
 

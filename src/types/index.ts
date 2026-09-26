@@ -30,3 +30,62 @@ export interface ApiResponse<T> {
   data: T;
   error?: string;
 }
+
+export type VehicleStatus = 'moving' | 'stopped' | 'no_comm';
+
+export interface FleetVehicle extends VehicleLatest {
+  status: VehicleStatus;
+}
+
+export interface FleetSummary {
+  totalFuel: number;
+  avgPerformance: number;
+  performanceUnit: string;
+  refillsToday: number;
+  activeAlerts: number;
+  activeUnits: number;
+  totalUnits: number;
+}
+
+export interface PerformancePoint {
+  date: string;
+  [imei: string]: string | number;
+}
+
+export interface PerformanceSeriesResponse {
+  series: PerformancePoint[];
+  imeis: string[];
+}
+
+export interface ConsumptionPoint {
+  date: string;
+  consumo: number;
+  rendimiento: number;
+}
+
+export type FleetEventType = 'refill' | 'sudden_drop' | 'no_comm';
+
+export interface FleetEvent {
+  type: FleetEventType;
+  imei: string;
+  recorded_at: string;
+  fuel_before?: number;
+  fuel_after?: number;
+  delta?: number;
+  minutes_since?: number;
+  latitude: number;
+  longitude: number;
+}
+
+export interface FuelLoad extends FleetEvent {
+  liters_estimated: number | null;
+}
+
+export interface LowPerformanceUnit {
+  imei: string;
+  currentPerformance: number;
+  previousPerformance: number;
+  variationPct: number;
+}
+
+export type SelectionMode = 'single' | 'all';

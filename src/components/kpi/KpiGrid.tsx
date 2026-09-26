@@ -1,30 +1,22 @@
-import { Fuel, Gauge, BatteryCharging, ShieldAlert, MapPin } from 'lucide-react';
+import { Fuel, Gauge, RefreshCcw, ShieldAlert, MapPin } from 'lucide-react';
 import { KpiCard } from './KpiCard';
-import type { Kpis, VehicleLatest } from '../../types';
+import type { FleetSummary } from '../../types';
 
-interface KpiGridProps {
-  kpis: Kpis | null;
-  vehicles: VehicleLatest[];
-}
-
-export function KpiGrid({ kpis, vehicles }: KpiGridProps) {
-  const totalFuel = vehicles.reduce((acc, v) => acc + (v.fuel ?? 0), 0);
-  const activeVehicles = vehicles.filter((v) => v.speed > 0).length;
-
+export function KpiGrid({ summary }: { summary: FleetSummary | null }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <KpiCard label="Combustible total" value={`${totalFuel.toFixed(0)} L`} icon={Fuel} color="blue" />
+      <KpiCard label="Combustible total" value={`${summary?.totalFuel ?? 0}%`} icon={Fuel} color="blue" />
       <KpiCard
-        label="Velocidad promedio"
-        value={`${(kpis?.avgSpeed ?? 0).toFixed(1)} km/h`}
+        label="Rendimiento promedio"
+        value={`${summary?.avgPerformance ?? 0} ${summary?.performanceUnit ?? ''}`}
         icon={Gauge}
         color="green"
       />
-      <KpiCard label="Velocidad máxima" value={`${(kpis?.maxSpeed ?? 0).toFixed(1)} km/h`} icon={BatteryCharging} color="orange" />
-      <KpiCard label="Registros totales" value={`${kpis?.totalRecords ?? 0}`} icon={ShieldAlert} color="red" />
+      <KpiCard label="Cargas hoy" value={`${summary?.refillsToday ?? 0}`} icon={RefreshCcw} color="orange" />
+      <KpiCard label="Alertas activas" value={`${summary?.activeAlerts ?? 0}`} icon={ShieldAlert} color="red" />
       <KpiCard
         label="Unidades activas"
-        value={`${activeVehicles} / ${vehicles.length}`}
+        value={`${summary?.activeUnits ?? 0} / ${summary?.totalUnits ?? 0}`}
         icon={MapPin}
         color="purple"
       />

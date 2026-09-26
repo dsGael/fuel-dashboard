@@ -1,11 +1,28 @@
 import axios from 'axios';
-import type { ApiResponse, VehicleLatest, Kpis, HistoryRecord } from '../types';
+import type { ApiResponse, VehicleLatest, Kpis, HistoryRecord ,
+  FleetVehicle,
+  FleetSummary,
+  PerformanceSeriesResponse,
+  ConsumptionPoint,
+  FleetEvent,
+  FuelLoad,
+  LowPerformanceUnit,
+} from '../types';
+
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3002/api',
 });
+interface RangeParams {
+  startDate?: string;
+  endDate?: string;
+}
 
-function normalizeVehicle(v: any): VehicleLatest {
+interface ImeiParams extends RangeParams {
+  imeis?: string[]; // undefined = todos
+}
+
+function normalizeVehicle(v: any): FleetVehicle {
   return {
     ...v,
     latitude: Number(v.latitude),
@@ -16,6 +33,50 @@ function normalizeVehicle(v: any): VehicleLatest {
     satellites: Number(v.satellites),
   };
 }
+
+export async function getFleetVehicles() {
+  const { data } = await api.get<ApiResponse<any[]>>('/fleet/vehicles');
+  return data.data.map(normalizeVehicle);
+}
+
+export async function getFleetSummary(params?: RangeParams) {
+  const { data } = await api.get<ApiResponse<FleetSummary>>('/fleet/summary', { params });
+  return data.data;
+}
+
+export async function getPerformanceSeries(params?: ImeiParams) {
+  const { data } = await api.get<ApiResponse<PerformanceSeriesResponse>>('/fleet/performance/series', {
+    params: { ...params, imeis: params?.imeis?.join(',') },
+  });
+  return data.data;
+}
+
+export async function getConsumption(params?: ImeiParams) {
+  const { data } = await api.get<ApiResponse<ConsumptionPoint[]>>('/fleet/consumption', {
+    params: { ...params, imeis: params?.imeis?.join(',') },
+  });
+  return data.data;
+}
+
+export async function getFleetEvents(params?: ImeiParams & { refillThreshold?: number; dropThreshold?: number }) {
+  const { data } = await api.get<ApiResponse<FleetEvent[]>>('/fleet/events', {
+    params: { ...params, imeis: params?.imeis?.join(',') },
+  });
+  return data.data;
+}
+
+export async function getFuelLoads(params?: ImeiParams & { refillThreshold?: number }) {
+  const { data } = await api.get<ApiResponse<FuelLoad[]>>('/fleet/fuel-loads', {
+    params: { ...params, imeis: params?.imeis?.join(',') },
+  });
+  return data.data;
+}
+
+export async function getLowPerformance(params?: RangeParams) {
+  const { data } = await api.get<ApiResponse<LowPerformanceUnit[]>>('/fleet/low-performance', { params });
+  return data.data;
+}
+
 
 export async function getLatestVehicles() {
   const { data } = await api.get<ApiResponse<VehicleLatest[]>>('/vehicles/latest');
