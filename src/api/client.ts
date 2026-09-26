@@ -1,5 +1,6 @@
 import axios from 'axios';
-import type { ApiResponse, VehicleLatest, Kpis, HistoryRecord ,
+import type { 
+  ApiResponse, VehicleLatest, Kpis, HistoryRecord,
   FleetVehicle,
   FleetSummary,
   PerformanceSeriesResponse,
@@ -9,10 +10,10 @@ import type { ApiResponse, VehicleLatest, Kpis, HistoryRecord ,
   LowPerformanceUnit,
 } from '../types';
 
-
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3002/api',
 });
+
 interface RangeParams {
   startDate?: string;
   endDate?: string;
@@ -77,7 +78,6 @@ export async function getLowPerformance(params?: RangeParams) {
   return data.data;
 }
 
-
 export async function getLatestVehicles() {
   const { data } = await api.get<ApiResponse<VehicleLatest[]>>('/vehicles/latest');
   return data.data.map(normalizeVehicle);
@@ -103,4 +103,23 @@ export async function getHistory(imei: string, params?: { startDate?: string; en
     params: { imei, ...params },
   });
   return data.data.map(normalizeHistory);
+}
+
+// --- NUEVO PARA LA TABLA DE REGISTROS CRUDOS ---
+function normalizeRecord(r: any) {
+  return {
+    ...r,
+    latitude: Number(r.latitude),
+    longitude: Number(r.longitude),
+    speed: Number(r.speed),
+    heading: Number(r.heading),
+    fuel: Number(r.fuel),
+    satellites: Number(r.satellites),
+    altitude: Number(r.altitude),
+  };
+}
+
+export async function getRecords(params?: { limit?: number }) {
+  const { data } = await api.get<ApiResponse<any[]>>('/records', { params });
+  return data.data.map(normalizeRecord);
 }

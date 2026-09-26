@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
-// Definimos la estructura de los datos que vienen de la base de datos
-interface GpsRecord {
-  id?: number;
+import { getRecords } from '../../api/client';
+import { Card } from '../ui/Card';
+// Si prefieres, puedes mover esta interfaz a tu archivo types.ts
+export interface GpsRecord {
   imei: string;
   recorded_at: string;
   latitude: number | null;
@@ -23,17 +23,11 @@ const RecordsTable: React.FC = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        // Llama a tu endpoint (ajusta el puerto/URL si lo publicas en producción)
-        const response = await fetch('http://localhost:3002/api/records?limit=100');
-        const result = await response.json();
-
-        if (result.success) {
-          setRecords(result.data);
-        } else {
-          setError(result.error || 'Error al obtener los registros');
-        }
-      } catch (err) {
-        setError('Error de conexión con el servidor de base de datos');
+        // Llama a la nueva función de tu cliente API
+        const data = await getRecords({ limit: 100 });
+        setRecords(data);
+      } catch (err: any) {
+        setError(err.response?.data?.error || 'Error al obtener los registros de la base de datos');
       } finally {
         setLoading(false);
       }
@@ -43,66 +37,68 @@ const RecordsTable: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-4 text-center text-gray-500">Cargando registros...</div>;
+    return <div className="p-4 text-center text-sm text-slate-500">Cargando registros...</div>;
   }
 
   if (error) {
-    return <div className="p-4 text-center text-red-500 font-bold">{error}</div>;
+    return <div className="p-4 text-center text-sm font-medium text-accent-red">{error}</div>;
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md w-full overflow-x-auto">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">
-        Historial Crudo de Registros GPS ({records.length})
-      </h2>
-      
-      <table className="min-w-full text-sm text-left border-collapse">
-        <thead className="bg-gray-100 text-gray-700 uppercase">
-          <tr>
-            <th className="px-4 py-3 border-b">IMEI</th>
-            <th className="px-4 py-3 border-b">Fecha y Hora</th>
-            <th className="px-4 py-3 border-b">Lat / Lng</th>
-            <th className="px-4 py-3 border-b">Velocidad</th>
-            <th className="px-4 py-3 border-b">Combustible</th>
-            <th className="px-4 py-3 border-b">Sats</th>
-            <th className="px-4 py-3 border-b">IO Data (Raw)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {records.length === 0 ? (
-            <tr>
-              <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                No hay registros en la base de datos.
-              </td>
+    <Card title={`Historial de registros GPS (${records.length})`}>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-190 text-left text-xs">
+          <thead>
+            <tr className="border-b border-border text-slate-400">
+              <th className="py-2 pr-4">IMEI</th>
+              <th className="py-2 pr-4">Fecha y hora</th>
+              <th className="py-2 pr-4">Lat / lng</th>
+              <th className="py-2 pr-4">Velocidad</th>
+              <th className="py-2 pr-4">Combustible</th>
+              <th className="py-2 pr-4">Sats</th>
+              <th className="py-2 pr-4">IO data</th>
             </tr>
-          ) : (
-            records.map((record, index) => (
-              <tr key={record.id || index} className="hover:bg-gray-50 border-b">
-                <td className="px-4 py-3 font-medium text-gray-900">{record.imei}</td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  {new Date(record.recorded_at).toLocaleString('es-MX')}
-                </td>
-                <td className="px-4 py-3">
-                  {record.latitude !== null && record.longitude !== null 
-                    ? `${record.latitude.toFixed(5)}, ${record.longitude.toFixed(5)}`
-                    : 'N/A'}
-                </td>
-                <td className="px-4 py-3">
-                  {record.speed !== null ? `${record.speed} km/h` : '-'}
-                </td>
-                <td className="px-4 py-3 font-semibold text-blue-600">
-                  {record.fuel !== null ? record.fuel : '-'}
-                </td>
-                <td className="px-4 py-3">{record.satellites ?? '-'}</td>
-                <td className="px-4 py-3 text-xs text-gray-500 max-w-xs truncate" title={JSON.stringify(record.io_data)}>
-                  {record.io_data ? JSON.stringify(record.io_data) : '{}'}
+          </thead>
+          <tbody>
+            {records.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-4 text-center text-slate-500">
+                  No hay registros en la base de datos.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            ) : (
+              records.map((record, index) => (
+                <tr
+                  key={`${record.imei}-${record.recorded_at}-${index}`}
+                  className="border-b border-border/50 hover:bg-white/5"
+                >
+                  <td className="py-2 pr-4 font-medium text-slate-200">{record.imei}</td>
+                  <td className="whitespace-nowrap py-2 pr-4 text-slate-400">
+                    {new Date(record.recorded_at).toLocaleString('es-MX')}
+                  </td>
+                  <td className="py-2 pr-4">
+                    {record.latitude !== null && record.longitude !== null
+                      ? `${record.latitude.toFixed(5)}, ${record.longitude.toFixed(5)}`
+                      : 'N/A'}
+                  </td>
+                  <td className="py-2 pr-4">{record.speed !== null ? `${record.speed} km/h` : '-'}</td>
+                  <td className="py-2 pr-4 font-semibold text-accent-blue">
+                    {record.fuel !== null ? record.fuel : '-'}
+                  </td>
+                  <td className="py-2 pr-4">{record.satellites ?? '-'}</td>
+                  <td
+                    className="max-w-xs truncate py-2 pr-4 text-slate-500"
+                    title={JSON.stringify(record.io_data)}
+                  >
+                    {record.io_data ? JSON.stringify(record.io_data) : '{}'}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </Card>
   );
 };
 
