@@ -12,6 +12,7 @@ import { useConsumption } from './hooks/useConsumption';
 import { useFleetEvents } from './hooks/useFleetEvents';
 import { useFuelLoads } from './hooks/useFuelLoads';
 import { useLowPerformance } from './hooks/useLowPerformance';
+import RecordsTable from './components/table/RecordsTable';
 
 function Dashboard() {
   const { imeis } = useVehicleSelection();
@@ -31,6 +32,8 @@ function Dashboard() {
         </div>
         <VehicleSelector />
       </header>
+
+      <RecordsTable  />      
 
       <KpiGrid summary={summary} />
 
