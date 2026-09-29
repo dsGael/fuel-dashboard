@@ -11,7 +11,7 @@ export interface GpsRecord {
   speed: number | null;
   heading: number | null;
   fuel: number | null;
-  satellites: number | null;
+  s_analogo: number | null;
   io_data: Record<string, any> | null;
 }
 
@@ -55,7 +55,7 @@ const RecordsTable: React.FC = () => {
               <th className="py-2 pr-4">Lat / lng</th>
               <th className="py-2 pr-4">Velocidad</th>
               <th className="py-2 pr-4">Combustible</th>
-              <th className="py-2 pr-4">Sats</th>
+              <th className="py-2 pr-4">Sensor Analogo</th>
               <th className="py-2 pr-4">IO data</th>
             </tr>
           </thead>
@@ -85,7 +85,7 @@ const RecordsTable: React.FC = () => {
                   <td className="py-2 pr-4 font-semibold text-accent-blue">
                     {record.fuel !== null ? record.fuel : '-'}
                   </td>
-                  <td className="py-2 pr-4">{record.satellites ?? '-'}</td>
+                  <td className="py-2 pr-4">{record.s_analogo !== null ? record.s_analogo : '-'}</td>
                   <td
                     className="max-w-xs truncate py-2 pr-4 text-slate-500"
                     title={JSON.stringify(record.io_data)}
