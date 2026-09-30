@@ -13,6 +13,10 @@ import { useFleetEvents } from './hooks/useFleetEvents';
 import { useFuelLoads } from './hooks/useFuelLoads';
 import { useLowPerformance } from './hooks/useLowPerformance';
 import RecordsTable from './components/table/RecordsTable';
+import type { GpsRecord } from './types';
+import { useEffect, useState } from 'react';
+import { getRecords } from './api/client';
+import GpsMap from './components/maps/GpsMap';
 
 function Dashboard() {
   const { imeis } = useVehicleSelection();
@@ -22,6 +26,25 @@ function Dashboard() {
   const { events } = useFleetEvents(imeis);
   const { loads } = useFuelLoads(imeis);
   const { units } = useLowPerformance();
+
+  const [records, setRecords] = useState<GpsRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const data = await getRecords({ limit: 1000 });
+        setRecords(data);
+      } catch (err: any) {
+        setError(err.response?.data?.error || 'Error al obtener los registros de la base de datos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecords();
+  }, []);
 
   return (
     <div className="min-h-screen bg-surface p-6 space-y-6">
@@ -33,7 +56,11 @@ function Dashboard() {
         <VehicleSelector />
       </header>
 
-      <RecordsTable  />      
+    {!loading && !error && (
+        <GpsMap records={records} />
+      )}
+      <RecordsTable records={records} loading={loading} error={error} />      
+
 
       <KpiGrid summary={summary} />
 

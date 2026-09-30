@@ -1,3 +1,23 @@
+export interface GpsRecord {
+  imei: string;
+  recorded_at: string;
+  latitude: number | null;
+  longitude: number | null;
+  altitude: number | null;
+  speed: number | null;
+  heading: number | null;
+  fuel: number | null; // Sensor Externo
+  s_analogo: number | null; // Sensor Análogo
+  ignicion: boolean | null;
+  odometro_total: number | null;
+  odometro_viaje: number | null;
+  movimiento: boolean | null;
+  satellites: number | null;
+  voltaje: number | null;
+  litros_totales: number | null; // Litros en Tanque
+  io_data: Record<string, any> | null;
+}
+
 export interface VehicleLatest {
   imei: string;
   recorded_at: string;
