@@ -55,11 +55,11 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
 
   return (
     <Card title={`Historial de registros GPS (${records.length})`}>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[1200px] text-left text-xs">
-          <thead>
-            <tr className="border-b border-border text-slate-400">
-              <th className="py-2 pr-4">IMEI</th>
+      <div className="overflow-x-auto-auto ">
+        <table className="w-full min-w-300 text-left text-xs">
+          <thead className="bg-slate-800 text-slate-400 sticky top-0 z-10 px-5">
+            <tr className="border-b border-border  text-slate-400 text-center">
+              <th className="py-2 pr-4 ">IMEI</th>
               <th className="py-2 pr-4">Fecha y hora</th>
               <th className="py-2 pr-4">Lat / lng</th>
               <th className="py-2 pr-4">Velocidad</th>
@@ -75,7 +75,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
           </thead>
           <tbody>
             {currentRecords.length === 0 ? (
-              <tr>
+              <tr className="border-b border-border/50 hover:bg-white/5">
                 <td colSpan={12} className="py-4 text-center text-slate-500">
                   No hay registros en la base de datos.
                 </td>
@@ -84,7 +84,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
               currentRecords.map((record, index) => (
                 <tr
                   key={`${record.imei}-${record.recorded_at}-${index}`}
-                  className="border-b border-border/50 hover:bg-white/5"
+                  className="border-b border-border/50 hover:bg-white/5 text-right"
                 >
                   <td className="py-2 pr-4 font-medium text-slate-200">{record.imei}</td>
                   <td className="whitespace-nowrap py-2 pr-4 text-slate-400">
@@ -102,29 +102,29 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                     {record.litros_totales !== null ? `${record.litros_totales} L` : '-'}
                   </td>
                   <td className="py-2 pr-4">
-                    {record.voltaje !== null ? `${record.voltaje/1000} V` : '-'}
+                    {record.voltaje !== null ? `${(record.voltaje/1000).toFixed(2)} V` : '-'}
                   </td>
-                  <td className="py-2 pr-4">
+                  <td className="py-2 pr-4 text-center">
                     {record.ignicion !== null 
                       ? (record.ignicion === true ? 'Encendido' : 'Apagado') 
                       : '-'}
                   </td>
-                  <td className="py-2 pr-4">
+                  <td className="py-2 pr-4 text-center">
                     {record.movimiento !== null 
                       ? (record.movimiento === true ? 'Sí' : 'No') 
                       : '-'}
                   </td>
-                  <td className="py-2 pr-4">
-                    {record.odometro_total !== null ? record.odometro_total : '-'}
+                  <td className="py-2 pr-4 ">
+                    {record.odometro_total ?? '-'}
                   </td>
                   <td className="py-2 pr-4">
-                    {record.odometro_viaje !== null ? record.odometro_viaje : '-'}
+                    {record.odometro_viaje ?? '-'}
                   </td>
                   <td className="py-2 pr-4">
-                    {record.s_analogo !== null ? record.s_analogo : '-'}
+                    {record.s_analogo ?? '-'}
                   </td>
                   <td className="py-2 pr-4 text-slate-400">
-                    {record.fuel !== null ? record.fuel : '-'}
+                    {record.fuel ?? '-'}
                   </td>
                 </tr>
               ))
