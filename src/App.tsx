@@ -46,6 +46,18 @@ function Dashboard() {
     fetchRecords();
   }, []);
 
+
+  // --- NUEVO: FILTRO PARA "HOY" ---
+  // Obtenemos la fecha actual en formato texto simple (ej. "Wed Sep 30 2026")
+  const todayString = new Date().toDateString();
+  
+  // Filtramos el arreglo de records
+  const recordsDeHoy = records.filter(record => {
+    const recordDate = new Date(record.recorded_at);
+    return recordDate.toDateString() === todayString;
+  });
+
+
   return (
     <div className="min-h-screen bg-surface p-6 space-y-6">
       <header className="flex items-center justify-between flex-wrap gap-4">
@@ -57,7 +69,7 @@ function Dashboard() {
       </header>
 
     {!loading && !error && (
-        <GpsMap records={records} />
+        <GpsMap records={recordsDeHoy} />
       )}
       <RecordsTable records={records} loading={loading} error={error} />      
 

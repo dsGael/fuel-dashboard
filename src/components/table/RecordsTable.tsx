@@ -98,11 +98,11 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                   <td className="py-2 pr-4">
                     {record.speed !== null ? `${record.speed} km/h` : '-'}
                   </td>
-                  <td className="py-2 pr-4 font-semibold text-accent-blue">
+                  <td className="py-2 pr-4 font-semibold text-accent-green">
                     {record.litros_totales !== null ? `${record.litros_totales} L` : '-'}
                   </td>
                   <td className="py-2 pr-4">
-                    {record.voltaje !== null ? `${record.voltaje} V` : '-'}
+                    {record.voltaje !== null ? `${record.voltaje/1000} V` : '-'}
                   </td>
                   <td className="py-2 pr-4">
                     {record.ignicion !== null 
