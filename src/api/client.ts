@@ -126,13 +126,7 @@ export async function getRecords(params?: { limit?: number }) {
 
 // En tu archivo api/client.ts (o donde tengas getRecords)
 
-export const getFuel5MinRecords = async ({ limit = 1000 }) => {
-  const response = await fetch(`/api/fuel-5min?limit=${limit}`);
-  const json = await response.json();
-  
-  if (!json.success) {
-    throw new Error(json.error || 'Error al obtener bloques de 5 min');
-  }
-  
-  return json.data;
-};
+export async function getFuel5MinRecords(params?: { limit?: number }) {
+  const { data } = await api.get<ApiResponse<any[]>>('/fuel-5min', { params });
+  return data.data;
+}
