@@ -14,11 +14,17 @@ import { useFleetEvents } from './hooks/useFleetEvents';
 import { useFuelLoads } from './hooks/useFuelLoads';
 import { useLowPerformance } from './hooks/useLowPerformance';
 import RecordsTable from './components/table/RecordsTable';
-import type { GpsRecord } from './types';
-import { getRecords } from './api/client';
+import Fuel5MinTable from './components/table/Fuel5MinTable';
 import GpsMap from './components/maps/GpsMap';
 
-// 1. Instanciamos el cliente de React Query fuera de los componentes
+// Asegúrate de exportar/importar tus tipos correctamente
+import type { GpsRecord } from './types'; 
+// Importa la interfaz desde donde la hayas guardado (puede estar en el mismo archivo de la tabla o en types.ts)
+import type { Fuel5MinRecord } from './components/table/Fuel5MinTable'; 
+
+// Importa ambas funciones de tu API
+import { getRecords, getFuel5MinRecords } from './api/client';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -37,26 +43,38 @@ function Dashboard() {
   const { loads } = useFuelLoads(imeis);
   const { units } = useLowPerformance();
 
-  // 2. Reemplazamos useState y useEffect con useQuery
+  // 1. Query para los registros CRUDOS originales
   const { 
     data: records = [], 
-    isLoading, 
-    error 
+    isLoading: isLoadingRecords, 
+    error: errorRecords 
   } = useQuery<GpsRecord[]>({
     queryKey: ['gps_records'],
     queryFn: () => getRecords({ limit: 2000 }),
-    refetchInterval: 30000, // Recarga automática cada 30 segundos
+    refetchInterval: 30000,
   });
 
-  // Filtro para "hoy"
+  // 2. NUEVO Query para los registros PROCESADOS de 5 minutos
+  const {
+    data: fuel5MinRecords = [],
+    isLoading: isLoadingFuel5Min,
+    error: errorFuel5Min
+  } = useQuery<Fuel5MinRecord[]>({
+    queryKey: ['fuel_5min_records'],
+    queryFn: () => getFuel5MinRecords({ limit: 1000 }),
+    refetchInterval: 30000,
+  });
+
+  // Filtro para "hoy" en la tabla cruda
   const todayString = new Date().toDateString();
   const recordsDeHoy = records.filter(record => {
     const recordDate = new Date(record.recorded_at);
     return recordDate.toDateString() === todayString;
   });
 
-  // Parseamos el error a string si existe para pasarlo a la tabla
-  const errorMessage = error instanceof Error ? error.message : null;
+  // Parseo de errores
+  const errorMessageRecords = errorRecords instanceof Error ? errorRecords.message : null;
+  const errorMessageFuel5Min = errorFuel5Min instanceof Error ? errorFuel5Min.message : null;
 
   return (
     <div className="min-h-screen bg-surface p-6 space-y-6">
@@ -68,17 +86,26 @@ function Dashboard() {
         <VehicleSelector />
       </header>
 
-      {!isLoading && !errorMessage && (
-        <GpsMap records={recordsDeHoy} />
-      )}
+     
+
+      {/* AQUÍ INYECTAMOS LA DATA CORRECTA DE 5 MINUTOS */}
+      <Fuel5MinTable
+        records={fuel5MinRecords}
+        loading={isLoadingFuel5Min}
+        error={errorMessageFuel5Min}
+      />  
       
       <RecordsTable 
         records={records} 
-        loading={isLoading} 
-        error={errorMessage} 
+        loading={isLoadingRecords} 
+        error={errorMessageRecords} 
       />      
 
-      <KpiGrid summary={summary} />
+       {!isLoadingRecords && !errorMessageRecords && (
+        <GpsMap records={recordsDeHoy} />
+      )}
+
+      {/* <KpiGrid summary={summary} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <MultiLineChartCard
@@ -98,13 +125,13 @@ function Dashboard() {
       </div>
 
       <LowPerformanceTable units={units} />
-    </div>
+      */}
+    </div> 
   );
 }
 
 function App() {
   return (
-    // 3. Envolvemos la aplicación con el Provider
     <QueryClientProvider client={queryClient}>
       <VehicleSelectionProvider>
         <Dashboard />
@@ -113,4 +140,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
