@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { VehicleSelectionProvider, useVehicleSelection } from './context/VehicleSelectionContext';
 import { VehicleSelector } from './components/controls/VehicleSelector';
 import { KpiGrid } from './components/kpi/KpiGrid';
@@ -14,9 +15,18 @@ import { useFuelLoads } from './hooks/useFuelLoads';
 import { useLowPerformance } from './hooks/useLowPerformance';
 import RecordsTable from './components/table/RecordsTable';
 import type { GpsRecord } from './types';
-import { useEffect, useState } from 'react';
 import { getRecords } from './api/client';
 import GpsMap from './components/maps/GpsMap';
+
+// 1. Instanciamos el cliente de React Query fuera de los componentes
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: true,
+      retry: 2,
+    },
+  },
+});
 
 function Dashboard() {
   const { imeis } = useVehicleSelection();
@@ -27,36 +37,26 @@ function Dashboard() {
   const { loads } = useFuelLoads(imeis);
   const { units } = useLowPerformance();
 
-  const [records, setRecords] = useState<GpsRecord[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // 2. Reemplazamos useState y useEffect con useQuery
+  const { 
+    data: records = [], 
+    isLoading, 
+    error 
+  } = useQuery<GpsRecord[]>({
+    queryKey: ['gps_records'],
+    queryFn: () => getRecords({ limit: 2000 }),
+    refetchInterval: 30000, // Recarga automática cada 30 segundos
+  });
 
-  useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const data = await getRecords({ limit: 1000 });
-        setRecords(data);
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Error al obtener los registros de la base de datos');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecords();
-  }, []);
-
-
-  // --- NUEVO: FILTRO PARA "HOY" ---
-  // Obtenemos la fecha actual en formato texto simple (ej. "Wed Sep 30 2026")
+  // Filtro para "hoy"
   const todayString = new Date().toDateString();
-  
-  // Filtramos el arreglo de records
   const recordsDeHoy = records.filter(record => {
     const recordDate = new Date(record.recorded_at);
     return recordDate.toDateString() === todayString;
   });
 
+  // Parseamos el error a string si existe para pasarlo a la tabla
+  const errorMessage = error instanceof Error ? error.message : null;
 
   return (
     <div className="min-h-screen bg-surface p-6 space-y-6">
@@ -68,11 +68,15 @@ function Dashboard() {
         <VehicleSelector />
       </header>
 
-    {!loading && !error && (
+      {!isLoading && !errorMessage && (
         <GpsMap records={recordsDeHoy} />
       )}
-      <RecordsTable records={records} loading={loading} error={error} />      
-
+      
+      <RecordsTable 
+        records={records} 
+        loading={isLoading} 
+        error={errorMessage} 
+      />      
 
       <KpiGrid summary={summary} />
 
@@ -100,10 +104,13 @@ function Dashboard() {
 
 function App() {
   return (
-    <VehicleSelectionProvider>
-      <Dashboard />
-    </VehicleSelectionProvider>
+    // 3. Envolvemos la aplicación con el Provider
+    <QueryClientProvider client={queryClient}>
+      <VehicleSelectionProvider>
+        <Dashboard />
+      </VehicleSelectionProvider>
+    </QueryClientProvider>
   );
 }
 
-export default App;
+export default App; 
