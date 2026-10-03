@@ -1,25 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
-
-export interface GpsRecord {
-  imei: string;
-  recorded_at: string;
-  latitude: number | null;
-  longitude: number | null;
-  altitude: number | null;
-  speed: number | null;
-  heading: number | null;
-  fuel: number | null; 
-  s_analogo: number | null; 
-  ignicion: boolean | null; 
-  odometro_total: number | null;
-  odometro_viaje: number | null;
-  movimiento: boolean | null; 
-  satellites: number | null;
-  voltaje: number | null;
-  litros_totales: number | null; 
-  io_data: Record<string, any> | null;
-}
+import type { GpsRecord } from '../../types';
 
 interface RecordsTableProps {
   records: GpsRecord[];
@@ -55,20 +36,22 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
 
   return (
     <Card title={`Historial de registros GPS (${records.length})`}>
-      <div className="overflow-x-auto-auto ">
-        <table className="w-full min-w-300 text-left text-xs">
+      {/* Contenedor limpio sin overflow para que el sticky funcione con la ventana del navegador */}
+      <div className="w-full">
+        <table className="w-full min-w-[300px] text-left text-xs">
           <thead className="bg-slate-800 text-slate-400 sticky top-0 z-10 px-5">
-            <tr className="border-b border-border  text-slate-400 text-center">
-              <th className="py-2 pr-4 ">IMEI</th>
+            <tr className="border-b border-border text-slate-400 text-center">
+              <th className="py-2 pr-4">IMEI</th>
               <th className="py-2 pr-4">Fecha y hora</th>
               <th className="py-2 pr-4">Lat / lng</th>
               <th className="py-2 pr-4">Velocidad</th>
-              <th className="py-2 pr-4">Litros en Tanque</th>
               <th className="py-2 pr-4">Voltaje</th>
               <th className="py-2 pr-4">Ignición</th>
               <th className="py-2 pr-4">Movimiento</th>
               <th className="py-2 pr-4">Odómetro Total</th>
               <th className="py-2 pr-4">Odómetro Viaje</th>
+              <th className="py-2 pr-4">Ralentí</th>
+              <th className="py-2 pr-4">Inclinación (H / V)</th>
               <th className="py-2 pr-4">Sensor Análogo</th>
               <th className="py-2 pr-4">Sensor Externo</th>
             </tr>
@@ -76,7 +59,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
           <tbody>
             {currentRecords.length === 0 ? (
               <tr className="border-b border-border/50 hover:bg-white/5">
-                <td colSpan={12} className="py-4 text-center text-slate-500">
+                <td colSpan={13} className="py-4 text-center text-slate-500">
                   No hay registros en la base de datos.
                 </td>
               </tr>
@@ -98,9 +81,6 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                   <td className="py-2 pr-4">
                     {record.speed !== null ? `${record.speed} km/h` : '-'}
                   </td>
-                  <td className="py-2 pr-4 font-semibold text-accent-green">
-                    {record.litros_totales !== null ? `${record.litros_totales} L` : '-'}
-                  </td>
                   <td className="py-2 pr-4">
                     {record.voltaje !== null ? `${(record.voltaje/1000).toFixed(2)} V` : '-'}
                   </td>
@@ -114,11 +94,21 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                       ? (record.movimiento === true ? 'Sí' : 'No') 
                       : '-'}
                   </td>
-                  <td className="py-2 pr-4 ">
+                  <td className="py-2 pr-4">
                     {record.odometro_total ?? '-'}
                   </td>
                   <td className="py-2 pr-4">
                     {record.odometro_viaje ?? '-'}
+                  </td>
+                  <td className="py-2 pr-4 text-center">
+                    {record.ralenti !== null && record.ralenti !== undefined 
+                      ? (record.ralenti ? 'Sí' : 'No') 
+                      : '-'}
+                  </td>
+                  <td className="py-2 pr-4 text-center">
+                    {record.inclinacion_horizontal !== null && record.inclinacion_vertical !== null && record.inclinacion_horizontal !== undefined
+                      ? `${record.inclinacion_horizontal.toFixed(1)}° / ${record.inclinacion_vertical.toFixed(1)}°`
+                      : '-'}
                   </td>
                   <td className="py-2 pr-4">
                     {record.s_analogo ?? '-'}

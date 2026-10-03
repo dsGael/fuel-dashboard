@@ -1,28 +1,23 @@
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { VehicleSelectionProvider, useVehicleSelection } from './context/VehicleSelectionContext';
+import { VehicleSelectionProvider } from './context/VehicleSelectionContext';
 import { VehicleSelector } from './components/controls/VehicleSelector';
-import { KpiGrid } from './components/kpi/KpiGrid';
-import { MultiLineChartCard } from './components/charts/MultiLineChartCard';
-import { ConsumptionChartCard } from './components/charts/ConsumptionChartCard';
-import { EventsPanel } from './components/events/EventsPanel';
-import { FuelLoadsTable } from './components/table/FuelLoadsTable';
-import { LowPerformanceTable } from './components/table/LowPerformanceTable';
-import { useFleetSummary } from './hooks/useFleetSummary';
-import { usePerformanceSeries } from './hooks/usePerformanceSeries';
-import { useConsumption } from './hooks/useConsumption';
-import { useFleetEvents } from './hooks/useFleetEvents';
-import { useFuelLoads } from './hooks/useFuelLoads';
-import { useLowPerformance } from './hooks/useLowPerformance';
+// import { KpiGrid } from './components/kpi/KpiGrid';
+// import { MultiLineChartCard } from './components/charts/MultiLineChartCard';
+// import { ConsumptionChartCard } from './components/charts/ConsumptionChartCard';
+// import { EventsPanel } from './components/events/EventsPanel';
+// import { FuelLoadsTable } from './components/table/FuelLoadsTable';
+// import { LowPerformanceTable } from './components/table/LowPerformanceTable';
+// import { useFleetSummary } from './hooks/useFleetSummary';
+// import { usePerformanceSeries } from './hooks/usePerformanceSeries';
+// import { useConsumption } from './hooks/useConsumption';
+// import { useFleetEvents } from './hooks/useFleetEvents';
+// import { useFuelLoads } from './hooks/useFuelLoads';
+// import { useLowPerformance } from './hooks/useLowPerformance';
 import RecordsTable from './components/table/RecordsTable';
 import Fuel5MinTable from './components/table/Fuel5MinTable';
 import GpsMap from './components/maps/GpsMap';
 
-// Asegúrate de exportar/importar tus tipos correctamente
-import type { GpsRecord } from './types'; 
-// Importa la interfaz desde donde la hayas guardado (puede estar en el mismo archivo de la tabla o en types.ts)
-import type { Fuel5MinRecord } from './components/table/Fuel5MinTable'; 
-
-// Importa ambas funciones de tu API
+import type { Fuel5MinRecord, GpsRecord } from './types'; 
 import { getRecords, getFuel5MinRecords } from './api/client';
 
 const queryClient = new QueryClient({
@@ -35,13 +30,13 @@ const queryClient = new QueryClient({
 });
 
 function Dashboard() {
-  const { imeis } = useVehicleSelection();
-  const { summary } = useFleetSummary();
-  const { data: perf } = usePerformanceSeries(imeis);
-  const { data: consumption } = useConsumption(imeis);
-  const { events } = useFleetEvents(imeis);
-  const { loads } = useFuelLoads(imeis);
-  const { units } = useLowPerformance();
+  // const { imeis } = useVehicleSelection();
+  // const { summary } = useFleetSummary();
+  // const { data: perf } = usePerformanceSeries(imeis);
+  // const { data: consumption } = useConsumption(imeis);
+  // const { events } = useFleetEvents(imeis);
+  // const { loads } = useFuelLoads(imeis);
+  // const { units } = useLowPerformance();
 
   // 1. Query para los registros CRUDOS originales
   const { 

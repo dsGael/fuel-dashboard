@@ -16,6 +16,26 @@ export interface GpsRecord {
   voltaje: number | null;
   litros_totales: number | null; // Litros en Tanque
   io_data: Record<string, any> | null;
+  ralenti: boolean | null;
+  inclinacion_horizontal: number | null;
+  inclinacion_vertical: number | null;
+}
+
+
+export interface Fuel5MinRecord {
+  id: string;
+  imei: string;
+  ventana_inicio: string;
+  ventana_fin: string;
+  litros_tanque: number | null;
+  sensor_mediana: number | null;
+  sensor_min: number | null;
+  sensor_max: number | null;
+  registros_usados: number;
+  odometro_total: number | null;
+  ignicion: boolean | null;
+  valido: boolean;
+  observacion: string | null;
 }
 
 export interface VehicleLatest {

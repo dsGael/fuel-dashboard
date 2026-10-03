@@ -1,21 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
+import type { Fuel5MinRecord } from '../../types';
 
-export interface Fuel5MinRecord {
-  id: string;
-  imei: string;
-  ventana_inicio: string;
-  ventana_fin: string;
-  litros_tanque: number | null;
-  sensor_mediana: number | null;
-  sensor_min: number | null;
-  sensor_max: number | null;
-  registros_usados: number;
-  odometro_total: number | null;
-  ignicion: boolean | null;
-  valido: boolean;
-  observacion: string | null;
-}
+
 
 interface Fuel5MinTableProps {
   records: Fuel5MinRecord[];
@@ -47,7 +34,7 @@ const Fuel5MinTable: React.FC<Fuel5MinTableProps> = ({ records, loading, error }
 
   return (
     <Card title={`Bloques de Combustible 5 Minutos (${records.length})`}>
-      <div className="overflow-x-auto">
+      <div className="">
         <table className="w-full min-w-max text-left text-xs">
           <thead className="bg-slate-800 text-slate-400 sticky top-0 z-10 px-5">
             <tr className="border-b border-border text-slate-400 text-center">
