@@ -119,14 +119,12 @@ function normalizeRecord(r: any) {
   };
 }
 
-export async function getRecords(params?: { limit?: number }) {
-  const { data } = await api.get<ApiResponse<any[]>>('/records', { params });
-  return data.data.map(normalizeRecord);
-}
-
-// En tu archivo api/client.ts (o donde tengas getRecords)
-
-export async function getFuel5MinRecords(params?: { limit?: number }) {
+export async function getFuel5MinRecords(params?: { limit?: number; startDate?: string; endDate?: string }) {
   const { data } = await api.get<ApiResponse<any[]>>('/fuel-5min', { params });
   return data.data;
+}
+
+export async function getRecords(params?: { limit?: number; startDate?: string; endDate?: string }) {
+  const { data } = await api.get<ApiResponse<any[]>>('/records', { params });
+  return data.data.map(normalizeRecord);
 }

@@ -99,8 +99,7 @@ export interface PerformanceSeriesResponse {
 
 export interface ConsumptionPoint {
   date: string;
-  consumo: number;
-  rendimiento: number;
+  [imei: string]: number | string; // Permite llaves dinámicas para cada IMEI
 }
 
 export type FleetEventType = 'refill' | 'sudden_drop' | 'no_comm';

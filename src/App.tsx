@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { VehicleSelectionProvider } from './context/VehicleSelectionContext';
+import { useVehicleSelection, VehicleSelectionProvider } from './context/VehicleSelectionContext';
 import { VehicleSelector } from './components/controls/VehicleSelector';
 // import { KpiGrid } from './components/kpi/KpiGrid';
 // import { MultiLineChartCard } from './components/charts/MultiLineChartCard';
@@ -9,7 +9,6 @@ import { VehicleSelector } from './components/controls/VehicleSelector';
 // import { LowPerformanceTable } from './components/table/LowPerformanceTable';
 // import { useFleetSummary } from './hooks/useFleetSummary';
 // import { usePerformanceSeries } from './hooks/usePerformanceSeries';
-// import { useConsumption } from './hooks/useConsumption';
 // import { useFleetEvents } from './hooks/useFleetEvents';
 // import { useFuelLoads } from './hooks/useFuelLoads';
 // import { useLowPerformance } from './hooks/useLowPerformance';
@@ -19,6 +18,10 @@ import GpsMap from './components/maps/GpsMap';
 
 import type { Fuel5MinRecord, GpsRecord } from './types'; 
 import { getRecords, getFuel5MinRecords } from './api/client';
+import { ConsumptionChartCard } from './components/charts/ConsumptionChartCard';
+import { useConsumption } from './hooks/useConsumption';
+import { useState } from 'react';
+import { DateRangePicker } from './components/controls/DateRangePicker';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,60 +33,84 @@ const queryClient = new QueryClient({
 });
 
 function Dashboard() {
-  // const { imeis } = useVehicleSelection();
+   const { imeis } = useVehicleSelection();
+
+const [dateRange, setDateRange] = useState(() => {
+    const hoy = new Date();
+    const hoyString = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    
+    // Por defecto mostrará solo hoy, pero puedes cambiarlo a que muestre 
+    // la última semana restando 7 días a la fecha de inicio
+    return {
+      start: hoyString,
+      end: hoyString 
+    };
+    });
+
+  const startDateTime = `${dateRange.start}T00:00:00.000`;
+  const endDateTime = `${dateRange.end}T23:59:59.999`;
+  
   // const { summary } = useFleetSummary();
   // const { data: perf } = usePerformanceSeries(imeis);
-  // const { data: consumption } = useConsumption(imeis);
-  // const { events } = useFleetEvents(imeis);
+const { data: consumption = [], isLoading: isLoadingConsumption } = useConsumption(imeis, startDateTime, endDateTime);  // const { events } = useFleetEvents(imeis);
   // const { loads } = useFuelLoads(imeis);
   // const { units } = useLowPerformance();
 
   // 1. Query para los registros CRUDOS originales
   const { 
     data: records = [], 
-    isLoading: isLoadingRecords, 
+    isFetching: isLoadingRecords, 
     error: errorRecords 
   } = useQuery<GpsRecord[]>({
     queryKey: ['gps_records'],
-    queryFn: () => getRecords({ limit: 2000 }),
+    queryFn: () => getRecords({ limit: 2000, startDate: startDateTime, endDate: endDateTime }),
     refetchInterval: 30000,
   });
 
   // 2. NUEVO Query para los registros PROCESADOS de 5 minutos
   const {
     data: fuel5MinRecords = [],
-    isLoading: isLoadingFuel5Min,
+    isFetching: isLoadingFuel5Min,
     error: errorFuel5Min
   } = useQuery<Fuel5MinRecord[]>({
     queryKey: ['fuel_5min_records'],
-    queryFn: () => getFuel5MinRecords({ limit: 1000 }),
+    queryFn: () => getFuel5MinRecords({ limit: 1000, startDate: startDateTime, endDate: endDateTime }),
     refetchInterval: 30000,
   });
 
-  // Filtro para "hoy" en la tabla cruda
-  const todayString = new Date().toDateString();
-  const recordsDeHoy = records.filter(record => {
-    const recordDate = new Date(record.recorded_at);
-    return recordDate.toDateString() === todayString;
-  });
-
+ 
   // Parseo de errores
   const errorMessageRecords = errorRecords instanceof Error ? errorRecords.message : null;
   const errorMessageFuel5Min = errorFuel5Min instanceof Error ? errorFuel5Min.message : null;
-
-  return (
+return (
     <div className="min-h-screen bg-surface p-6 space-y-6">
       <header className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard General</h1>
-          <p className="text-sm text-slate-400">Resumen de tu flota en tiempo real</p>
+          <p className="text-sm text-slate-400">Resumen de tu flota</p>
         </div>
-        <VehicleSelector />
+        
+        <div className="flex items-center gap-4 flex-wrap">
+          {/* 5. Inyectamos tu nuevo componente */}
+          <DateRangePicker 
+            startDate={dateRange.start}
+            endDate={dateRange.end}
+            onChange={(start, end) => setDateRange({ start, end })}
+          />
+          <VehicleSelector />
+        </div>
       </header>
-
      
 
-      {/* AQUÍ INYECTAMOS LA DATA CORRECTA DE 5 MINUTOS */}
+
+             {isLoadingConsumption ? (
+          <div className="flex items-center justify-center h-[340px] rounded-2xl bg-slate-800/20 border border-border">
+            <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
+          </div>
+        ) : (
+          <ConsumptionChartCard data={consumption} />
+        )}
+        
       <Fuel5MinTable
         records={fuel5MinRecords}
         loading={isLoadingFuel5Min}
@@ -96,9 +123,10 @@ function Dashboard() {
         error={errorMessageRecords} 
       />      
 
-       {!isLoadingRecords && !errorMessageRecords && (
-        <GpsMap records={recordsDeHoy} />
-      )}
+     {!isLoadingRecords && !errorMessageRecords && (
+        <GpsMap records={records} />
+                )}
+
 
       {/* <KpiGrid summary={summary} />
 
@@ -109,8 +137,7 @@ function Dashboard() {
           seriesKeys={perf.imeis}
           yLabel="km / % fuel"
         />
-        <ConsumptionChartCard data={consumption} />
-      </div>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
