@@ -19,6 +19,7 @@ export interface GpsRecord {
   ralenti: boolean | null;
   inclinacion_horizontal: number | null;
   inclinacion_vertical: number | null;
+  numero_economico?: string | null; 
 }
 
 
@@ -36,6 +37,7 @@ export interface Fuel5MinRecord {
   ignicion: boolean | null;
   valido: boolean;
   observacion: string | null;
+  numero_economico?: string | null;
 }
 
 export interface VehicleLatest {

@@ -18,11 +18,14 @@ export function ConsumptionChartCard({ data }: ConsumptionChartCardProps) {
 
     // Agrupamos la data que ya viene filtrada desde el backend
     data.forEach((punto) => {
+      if(punto.valido===false) return;
+
       if (!grouped[punto.date]) {
         grouped[punto.date] = { date: punto.date };
       }
       grouped[punto.date][punto.imei] = punto.litros;
       imeisUnicos.add(punto.imei);
+
     });
 
     const arregloFinal = Object.values(grouped).sort(

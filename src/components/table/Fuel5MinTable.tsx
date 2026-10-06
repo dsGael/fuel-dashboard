@@ -38,7 +38,7 @@ const Fuel5MinTable: React.FC<Fuel5MinTableProps> = ({ records, loading, error }
         <table className="w-full min-w-max text-left text-xs">
           <thead className="bg-slate-800 text-slate-400 sticky top-0 z-10 px-5">
             <tr className="border-b border-border text-slate-400 text-center">
-              <th className="py-2 pr-4 pl-2">IMEI</th>
+              <th className="py-2 pr-4 pl-2">Unidad</th>
               <th className="py-2 pr-4">Ventana Fin</th>
               <th className="py-2 pr-4">Litros (Mediana)</th>
               <th className="py-2 pr-4">Sensor (Mediana)</th>
@@ -62,7 +62,9 @@ const Fuel5MinTable: React.FC<Fuel5MinTableProps> = ({ records, loading, error }
                   key={record.id}
                   className="border-b border-border/50 hover:bg-white/5 text-right"
                 >
-                  <td className="py-2 pr-4 pl-2 font-medium text-slate-200 text-left">{record.imei}</td>
+                  <td className="py-2 pr-4 pl-2 font-medium text-slate-200 text-center">
+                    {record.numero_economico ? record.numero_economico : record.imei.slice(-4)}
+                  </td>
                   <td className="whitespace-nowrap py-2 pr-4 text-slate-400">
                     {new Date(record.ventana_fin).toLocaleString('es-MX')}
                   </td>

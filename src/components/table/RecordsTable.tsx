@@ -41,7 +41,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
         <table className="w-full min-w-[300px] text-left text-xs">
           <thead className="bg-slate-800 text-slate-400 sticky top-0 z-10 px-5">
             <tr className="border-b border-border text-slate-400 text-center">
-              <th className="py-2 pr-4">IMEI</th>
+              <th className="py-2 pr-4">Unidad</th>
               <th className="py-2 pr-4">Fecha y hora</th>
               <th className="py-2 pr-4">Lat / lng</th>
               <th className="py-2 pr-4">Velocidad</th>
@@ -69,7 +69,9 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                   key={`${record.imei}-${record.recorded_at}-${index}`}
                   className="border-b border-border/50 hover:bg-white/5 text-right"
                 >
-                  <td className="py-2 pr-4 font-medium text-slate-200">{record.imei}</td>
+                  <td className="py-2 pr-4 font-medium text-slate-200 text-center">
+                    {record.numero_economico ? record.numero_economico : record.imei.slice(-4)}
+                  </td>
                   <td className="whitespace-nowrap py-2 pr-4 text-slate-400">
                     {new Date(record.recorded_at).toLocaleString('es-MX')}
                   </td>
