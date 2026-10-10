@@ -4,7 +4,7 @@ import type {
   FleetVehicle,
   FleetSummary,
   PerformanceSeriesResponse,
-  ConsumptionPoint,
+  FuelPoint,
   FleetEvent,
   FuelLoad,
   LowPerformanceUnit,
@@ -53,7 +53,7 @@ export async function getPerformanceSeries(params?: ImeiParams) {
 }
 
 export async function getConsumption(params?: ImeiParams) {
-  const { data } = await api.get<ApiResponse<ConsumptionPoint[]>>('/fleet/consumption', {
+  const { data } = await api.get<ApiResponse<FuelPoint[]>>('/fuel/chart', {
     params: { ...params, imeis: params?.imeis?.join(',') },
   });
   return data.data;

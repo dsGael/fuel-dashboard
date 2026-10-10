@@ -99,9 +99,11 @@ export interface PerformanceSeriesResponse {
   imeis: string[];
 }
 
-export interface ConsumptionPoint {
-  date: string;
-  [imei: string]: number | string; // Permite llaves dinámicas para cada IMEI
+export interface FuelPoint {
+  imei: string;
+  numero_economico: string | number | null;
+  recorded_at: string;
+  fuel: number | null;
 }
 
 export type FleetEventType = 'refill' | 'sudden_drop' | 'no_comm';
