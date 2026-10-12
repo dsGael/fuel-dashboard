@@ -74,6 +74,7 @@ export function ConsumptionChartCard({ data, yMin, yMax, yTicks }: ConsumptionCh
             fontSize={11}
             domain={[yMin ?? 'auto', yMax ?? 'auto']}
             ticks={yTicks}
+            
             allowDataOverflow={yMin !== undefined || yMax !== undefined}
             label={{ value: 'Lectura', angle: -90, position: 'insideLeft', fill: '#64748B' }}
           />

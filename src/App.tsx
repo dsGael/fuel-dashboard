@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { useVehicleSelection, VehicleSelectionProvider } from './context/VehicleSelectionContext';
-import { VehicleSelector } from './components/controls/VehicleSelector';
+// import { VehicleSelector } from './components/controls/VehicleSelector';
 // import { KpiGrid } from './components/kpi/KpiGrid';
 // import { MultiLineChartCard } from './components/charts/MultiLineChartCard';
 // import { ConsumptionChartCard } from './components/charts/ConsumptionChartCard';
@@ -16,10 +16,11 @@ import RecordsTable from './components/table/RecordsTable';
 
 import { getRecords,  } from './api/client';
 import { ConsumptionChartCard } from './components/charts/ConsumptionChartCard';
-import { useConsumption } from './hooks/useConsumption';
+import { useConsumption, useConsumptionYARIS, useFuelProcessedChart } from './hooks/useConsumption';
 import { useState } from 'react';
 import { DateRangePicker } from './components/controls/DateRangePicker';
 import type { GpsRecord } from './types';
+import { ProcessedChartCard } from './components/charts/FuelProcessedChart';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,8 +52,16 @@ const [dateRange, setDateRange] = useState(() => {
   // const { summary } = useFleetSummary();
   // const { data: perf } = usePerformanceSeries(imeis);
 const { data: consumption = [],
-   isLoading: isLoadingConsumption }
-    = useConsumption(imeis, startDateTime, endDateTime);  // const { events } = useFleetEvents(imeis);
+   isLoading: isLoadingConsumption } = useConsumption(imeis, startDateTime, endDateTime);  // const { events } = useFleetEvents(imeis);
+
+   
+const { data: consumptionYARIS = [],
+   isLoading: isLoadingConsumptionYARIS } = useConsumptionYARIS(imeis, startDateTime, endDateTime);  // const { events } = useFleetEvents(imeis);
+
+  const { data: fuelProcessed = [],
+   isLoading: isLoadingFuelProcessed } = useFuelProcessedChart(imeis, startDateTime, endDateTime);  // const { events } = useFleetEvents(imeis);
+
+
   // const { loads } = useFuelLoads(imeis);
   // const { units } = useLowPerformance();
 
@@ -86,12 +95,12 @@ return (
             endDate={dateRange.end}
             onChange={(start, end) => setDateRange({ start, end })}
           />
-          <VehicleSelector />
+          {/* <VehicleSelector /> */}
         </div>
       </header>
      
 
-
+        CORBER SENSOR CRUDO
              {isLoadingConsumption ? (
           <div className="flex items-center justify-center h-[340px] rounded-2xl bg-slate-800/20 border border-border">
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
@@ -99,6 +108,25 @@ return (
         ) : (
           <ConsumptionChartCard data={consumption} yMin={0} yMax={3000}  />
         )}
+
+          YARIS SENSOR CRUDO
+           {isLoadingConsumptionYARIS ? (
+          <div className="flex items-center justify-center h-[340px] rounded-2xl bg-slate-800/20 border border-border">
+            <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
+          </div>
+        ) : (
+          <ConsumptionChartCard data={consumptionYARIS}   />
+        )}
+
+          YARIS EN LITROS
+           {isLoadingFuelProcessed ? (
+          <div className="flex items-center justify-center h-[340px] rounded-2xl bg-slate-800/20 border border-border">
+            <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
+          </div>
+        ) : (
+          <ProcessedChartCard data={fuelProcessed}   />
+        )}
+        
         
 
       <RecordsTable 

@@ -9,6 +9,7 @@ import type {
   FuelLoad,
   LowPerformanceUnit,
 } from '../types';
+import type { ProcessedPoint } from '../components/charts/FuelProcessedChart';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3002/api',
@@ -53,7 +54,20 @@ export async function getPerformanceSeries(params?: ImeiParams) {
 }
 
 export async function getConsumption(params?: ImeiParams) {
-  const { data } = await api.get<ApiResponse<FuelPoint[]>>('/fuel/chart', {
+  const { data } = await api.get<ApiResponse<FuelPoint[]>>('/fuel/chart/CORBER', {
+    params: { ...params, imeis: params?.imeis?.join(',') },
+  });
+  return data.data;
+}
+export async function getFuelProcessedChart(params?: ImeiParams) {
+  const { data } = await api.get<ApiResponse<ProcessedPoint[]>>('/fuel/processed/chart', {
+    params: { ...params, imeis: params?.imeis?.join(',') },
+  });
+  return data.data;
+}
+
+export async function getConsumptionYARIS(params?: ImeiParams) {
+  const { data } = await api.get<ApiResponse<FuelPoint[]>>('/fuel/chart/YARIS', {
     params: { ...params, imeis: params?.imeis?.join(',') },
   });
   return data.data;
