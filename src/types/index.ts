@@ -132,3 +132,44 @@ export interface LowPerformanceUnit {
 }
 
 export type SelectionMode = 'single' | 'all';
+
+// ---- Agregar a ../types ----
+
+// Respuesta paginada de la API (ApiResponse + total)
+export interface PagedResponse<T> extends ApiResponse<T> {
+  count: number;
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface FuelProcessedRecord {
+  id: string | number;
+  ventana_id: string | number | null;
+  ventana_inicio: string;
+  fecha_proceso: string | null;
+  imei: string;
+  idautobus: number | null;
+  numero_economico?: string | number | null;
+  litros_calculados: number | null;
+  litros_finales: number | null;
+  ultimo_valor_confiable_anterior: number | null;
+  diferencia_litros: number | null;
+  km_desde_ultimo_confiable: number | null;
+  rendimiento_usado: number | null;
+  consumo_esperado: number | null;
+  exceso_no_explicado: number | null;
+  calibracion_version_usada: string | number | null;
+  actualizo_final: boolean | null;
+  estado_resultado: string | null;
+  motivo: string | null;
+}
+
+export interface FuelProcessedQuery {
+  limit?: number;
+  offset?: number;
+  imei?: string;
+  idautobus?: string | number;
+  startDate?: string; // YYYY-MM-DD (endDate inclusivo) o ISO
+  endDate?: string;
+}

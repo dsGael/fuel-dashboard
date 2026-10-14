@@ -21,6 +21,8 @@ import { useState } from 'react';
 import { DateRangePicker } from './components/controls/DateRangePicker';
 import type { GpsRecord } from './types';
 import { ProcessedChartCard } from './components/charts/FuelProcessedChart';
+import { FuelProcessedTable } from './components/table/FuelProcessedTable';
+import { useFuelProcessed } from './hooks/useFuelProcessed';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +32,8 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+const PAGE_SIZE = 50;
 
 function Dashboard() {
    const { imeis } = useVehicleSelection();
@@ -76,6 +80,12 @@ const { data: consumptionYARIS = [],
     refetchInterval: 30000,
   });
 
+            const [page, setPage] = useState(0);
+  const { rows, total, loading, error, refetch } = useFuelProcessed({
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
+    // startDate: '2026-10-13', endDate: '2026-10-13', idautobus: 1,  // filtros opcionales
+  });
 
  
   // Parseo de errores
@@ -127,7 +137,19 @@ return (
           <ProcessedChartCard data={fuelProcessed}   />
         )}
         
-        
+
+
+
+      <FuelProcessedTable
+        rows={rows}
+        total={total}
+        page={page}
+        pageSize={PAGE_SIZE}
+        loading={loading}
+        error={error}
+        onPageChange={setPage}
+        onRefresh={refetch}
+      />
 
       <RecordsTable 
         records={records} 

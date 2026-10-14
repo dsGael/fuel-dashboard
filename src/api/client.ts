@@ -8,6 +8,9 @@ import type {
   FleetEvent,
   FuelLoad,
   LowPerformanceUnit,
+  FuelProcessedRecord,
+  FuelProcessedQuery,
+  PagedResponse,
 } from '../types';
 import type { ProcessedPoint } from '../components/charts/FuelProcessedChart';
 
@@ -141,4 +144,12 @@ export async function getFuel5MinRecords(params?: { limit?: number; startDate?: 
 export async function getRecords(params?: { limit?: number; startDate?: string; endDate?: string }) {
   const { data } = await api.get<ApiResponse<any[]>>('/records', { params });
   return data.data.map(normalizeRecord);
+}
+
+export async function getFuelProcessedRecords(params?: FuelProcessedQuery, signal?: AbortSignal) {
+  const { data } = await api.get<PagedResponse<FuelProcessedRecord[]>>('/fuel/processed', {
+    params,
+    signal,
+  });
+  return { rows: data.data, total: data.total };
 }
