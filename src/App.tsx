@@ -112,7 +112,7 @@ return (
 
         CORBER SENSOR CRUDO
              {isLoadingConsumption ? (
-          <div className="flex items-center justify-center h-[340px] rounded-2xl bg-slate-800/20 border border-border">
+          <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
           </div>
         ) : (
@@ -121,16 +121,16 @@ return (
 
           YARIS SENSOR CRUDO
            {isLoadingConsumptionYARIS ? (
-          <div className="flex items-center justify-center h-[340px] rounded-2xl bg-slate-800/20 border border-border">
+          <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
           </div>
         ) : (
-          <ConsumptionChartCard data={consumptionYARIS}   />
+          <ConsumptionChartCard data={consumptionYARIS} yMax={7000} yMin={4500}  />
         )}
 
           YARIS EN LITROS
            {isLoadingFuelProcessed ? (
-          <div className="flex items-center justify-center h-[340px] rounded-2xl bg-slate-800/20 border border-border">
+          <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
           </div>
         ) : (

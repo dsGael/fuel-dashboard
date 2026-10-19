@@ -8,7 +8,7 @@ export interface ProcessedPoint {
   imei: string;
   numero_economico: string | number | null;
   ventana_inicio: string;
-  litros_calculados: number | null;
+  //litros_calculados: number | null;
   litros_finales: number | null;
   estado_resultado?: string | null;
   actualizo_final?: boolean | null;
@@ -41,7 +41,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
     const etiquetas: Record<string, string> = {};
 
     data.forEach((p) => {
-      if (p.litros_calculados == null && p.litros_finales == null) return;
+      if (p.litros_finales == null) return;
 
       const unidad = p.numero_economico ? String(p.numero_economico) : String(p.idautobus ?? p.imei);
       let idx = unidades.indexOf(unidad);
@@ -52,7 +52,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
       }
 
       if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
-      if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
+      // if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
       if (p.litros_finales != null) grouped[p.ventana_inicio][`u${idx}_fin`] = Number(p.litros_finales);
     });
 
@@ -62,12 +62,12 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
 
     // Dos líneas por unidad, mismo color: calculados punteada, finales sólida
     const defs: SeriesDef[] = unidades.flatMap((unidad, idx) => [
-      {
-        dataKey: `u${idx}_calc`,
-        name: `${etiquetas[unidad]} · calculados`,
-        color: COLORS[idx % COLORS.length + 1],
-        dashed: true,
-      },
+      // {
+      //   dataKey: `u${idx}_calc`,
+      //   name: `${etiquetas[unidad]} · calculados`,
+      //   color: COLORS[idx % COLORS.length + 1],
+      //   dashed: true,
+      // },
       {
         dataKey: `u${idx}_fin`,
         name: `${etiquetas[unidad]} · finales`,
@@ -80,7 +80,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
   }, [data]);
 
   return (
-    <Card title="Litros calculados vs. finales">
+    <Card title="Litros finales">
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#232A3B" />
