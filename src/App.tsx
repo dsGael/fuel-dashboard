@@ -6,6 +6,7 @@ import { getRecords,  } from './api/client';
 import { ConsumptionChartCard } from './components/charts/ConsumptionChartCard';
 import { useConsumption, useConsumptionYARIS, useFuelProcessedChart } from './hooks/useConsumption';
 import { useState } from 'react';
+import { VehicleSelector } from './components/controls/VehicleSelector';
 import { DateRangePicker } from './components/controls/DateRangePicker';
 import type { GpsRecord } from './types';
 import { ProcessedChartCard } from './components/charts/FuelProcessedChart';
@@ -24,7 +25,7 @@ const queryClient = new QueryClient({
 const PAGE_SIZE = 50;
 
 function Dashboard() {
-   const { imeis } = useVehicleSelection();
+   const { selectedImei } = useVehicleSelection();
 
 const [dateRange, setDateRange] = useState(() => {
     const hoy = new Date();
@@ -40,30 +41,37 @@ const [dateRange, setDateRange] = useState(() => {
   const endDateTime = `${dateRange.end}T23:59:59.999`;
   
 const { data: consumption = [],
-   isLoading: isLoadingConsumption } = useConsumption(imeis, startDateTime, endDateTime);
+   isLoading: isLoadingConsumption } = useConsumption(selectedImei, startDateTime, endDateTime);
 
    
 const { data: consumptionYARIS = [],
-   isLoading: isLoadingConsumptionYARIS } = useConsumptionYARIS(imeis, startDateTime, endDateTime);
+   isLoading: isLoadingConsumptionYARIS } = useConsumptionYARIS(selectedImei, startDateTime, endDateTime);
 
   const { data: fuelProcessed = [],
-   isLoading: isLoadingFuelProcessed } = useFuelProcessedChart(imeis, startDateTime, endDateTime);
+   isLoading: isLoadingFuelProcessed } = useFuelProcessedChart(selectedImei, startDateTime, endDateTime);
 
   const { 
     data: records = [], 
     isFetching: isLoadingRecords, 
     error: errorRecords 
   } = useQuery<GpsRecord[]>({
-    queryKey: ['gps_records'],
-    queryFn: () => getRecords({ limit: 2000, startDate: startDateTime, endDate: endDateTime }),
+    queryKey: ['gps_records', selectedImei, startDateTime, endDateTime],
+    queryFn: () => getRecords({ limit: 2000, imei: selectedImei, startDate: startDateTime, endDate: endDateTime }),
     refetchInterval: 30000,
   });
 
-            const [page, setPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [prevImei, setPrevImei] = useState(selectedImei);
+  if (prevImei !== selectedImei) {
+    setPrevImei(selectedImei);
+    setPage(0);
+  }
   const { rows, total, loading, error, refetch } = useFuelProcessed({
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
+    ...(selectedImei ? { imei: selectedImei } : {}),
   });
+
 
  
   const errorMessageRecords = errorRecords instanceof Error ? errorRecords.message : null;
@@ -75,7 +83,8 @@ return (
           <p className="text-sm text-slate-400">Resumen de tu flota</p>
         </div>
         
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-end gap-4 flex-wrap">
+          <VehicleSelector />
           <DateRangePicker 
             startDate={dateRange.start}
             endDate={dateRange.end}

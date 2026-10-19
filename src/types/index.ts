@@ -22,27 +22,16 @@ export interface GpsRecord {
   numero_economico?: string | null; 
 }
 
-export interface VehicleLatest {
-  imei: string;
-  recorded_at: string;
-  latitude: number;
-  longitude: number;
-  speed: number;
-  heading: number;
-  fuel: number;
-  satellites: number;
-}
-
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
   error?: string;
 }
 
-export type VehicleStatus = 'moving' | 'stopped' | 'no_comm';
-
-export interface FleetVehicle extends VehicleLatest {
-  status: VehicleStatus;
+export interface Autobus {
+  idautobus: number;
+  numero_economico: string | number | null;
+  imei: string;
 }
 
 export interface FuelPoint {
@@ -51,8 +40,6 @@ export interface FuelPoint {
   recorded_at: string;
   fuel: number | null;
 }
-
-export type SelectionMode = 'single' | 'all';
 
 // Respuesta paginada de la API (ApiResponse + total)
 export interface PagedResponse<T> extends ApiResponse<T> {

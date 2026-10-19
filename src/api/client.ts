@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type {
   ApiResponse,
-  FleetVehicle,
+  Autobus,
   FuelPoint,
   FuelProcessedRecord,
   FuelProcessedQuery,
@@ -19,42 +19,30 @@ interface RangeParams {
 }
 
 interface ImeiParams extends RangeParams {
-  imeis?: string[]; // undefined = todos
+  imei?: string | null; // null/undefined = todos
 }
 
-function normalizeVehicle(v: any): FleetVehicle {
-  return {
-    ...v,
-    latitude: Number(v.latitude),
-    longitude: Number(v.longitude),
-    speed: Number(v.speed),
-    heading: Number(v.heading),
-    fuel: Number(v.fuel),
-    satellites: Number(v.satellites),
-  };
-}
-
-export async function getFleetVehicles() {
-  const { data } = await api.get<ApiResponse<any[]>>('/fleet/vehicles');
-  return data.data.map(normalizeVehicle);
+export async function getAutobuses() {
+  const { data } = await api.get<ApiResponse<Autobus[]>>('/autobuses');
+  return data.data;
 }
 
 export async function getConsumption(params?: ImeiParams) {
   const { data } = await api.get<ApiResponse<FuelPoint[]>>('/fuel/chart/CORBER', {
-    params: { ...params, imeis: params?.imeis?.join(',') },
+    params,
   });
   return data.data;
 }
 export async function getFuelProcessedChart(params?: ImeiParams) {
   const { data } = await api.get<ApiResponse<ProcessedPoint[]>>('/fuel/processed/chart', {
-    params: { ...params, imeis: params?.imeis?.join(',') },
+    params,
   });
   return data.data;
 }
 
 export async function getConsumptionYARIS(params?: ImeiParams) {
   const { data } = await api.get<ApiResponse<FuelPoint[]>>('/fuel/chart/YARIS', {
-    params: { ...params, imeis: params?.imeis?.join(',') },
+    params,
   });
   return data.data;
 }
@@ -72,7 +60,7 @@ function normalizeRecord(r: any) {
   };
 }
 
-export async function getRecords(params?: { limit?: number; startDate?: string; endDate?: string }) {
+export async function getRecords(params?: ImeiParams & { limit?: number }) {
   const { data } = await api.get<ApiResponse<any[]>>('/records', { params });
   return data.data.map(normalizeRecord);
 }

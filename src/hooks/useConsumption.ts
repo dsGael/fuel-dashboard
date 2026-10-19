@@ -2,29 +2,29 @@
 import { useQuery } from '@tanstack/react-query';
 import { getConsumption, getConsumptionYARIS, getFuelProcessedChart } from '../api/client';
 
-export function useConsumption(imeis: string[], startDate?: string, endDate?: string) {
+export function useConsumption(imei: string | null, startDate?: string, endDate?: string) {
   return useQuery({
     // Agregamos las fechas a la llave para que React Query recargue cuando cambien
-    queryKey: ['fuel_consumption', imeis.join(','), startDate, endDate], 
-    queryFn: () => getConsumption({ imeis, startDate, endDate }),
+    queryKey: ['fuel_consumption', imei, startDate, endDate], 
+    queryFn: () => getConsumption({ imei, startDate, endDate }),
     refetchInterval: 30000,
   });
 }
 
-export function useConsumptionYARIS(imeis: string[], startDate?: string, endDate?: string) {
+export function useConsumptionYARIS(imei: string | null, startDate?: string, endDate?: string) {
   return useQuery({
     // Agregamos las fechas a la llave para que React Query recargue cuando cambien
-    queryKey: ['fuel_consumption_YARIS', imeis.join(','), startDate, endDate], 
-    queryFn: () => getConsumptionYARIS({ imeis, startDate, endDate }),
+    queryKey: ['fuel_consumption_YARIS', imei, startDate, endDate], 
+    queryFn: () => getConsumptionYARIS({ imei, startDate, endDate }),
     refetchInterval: 30000,
   });
 }
 
-export function useFuelProcessedChart(imeis: string[], startDate?: string, endDate?: string) {
+export function useFuelProcessedChart(imei: string | null, startDate?: string, endDate?: string) {
   return useQuery({
     // Agregamos las fechas a la llave para que React Query recargue cuando cambien
-    queryKey: ['fuel_processed_chart', imeis.join(','), startDate, endDate], 
-    queryFn: () => getFuelProcessedChart({ imeis, startDate, endDate }),
+    queryKey: ['fuel_processed_chart', imei, startDate, endDate], 
+    queryFn: () => getFuelProcessedChart({ imei, startDate, endDate }),
     refetchInterval: 30000,
   });
   }

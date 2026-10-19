@@ -1,40 +1,24 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import { useFleetVehicles } from '../hooks/useFleetVehicles';
-import type { SelectionMode } from '../types';
+import { createContext, useContext, useState, type ReactNode } from 'react';
+import { useAutobuses } from '../hooks/useAutobuses';
 
 interface VehicleSelectionValue {
-  mode: SelectionMode;
-  setMode: (m: SelectionMode) => void;
-  selectedImei: string | null;
-  setSelectedImei: (imei: string) => void;
-  imeis: string[]; // lista efectiva a pedir en las gráficas: [imei] o todos
-  vehicles: ReturnType<typeof useFleetVehicles>['vehicles'];
+  selectedImei: string | null; // null = todas las unidades
+  setSelectedImei: (imei: string | null) => void;
+  autobuses: ReturnType<typeof useAutobuses>['autobuses'];
   loading: boolean;
 }
 
 const VehicleSelectionContext = createContext<VehicleSelectionValue | null>(null);
 
 export function VehicleSelectionProvider({ children }: { children: ReactNode }) {
-  const { vehicles, loading } = useFleetVehicles();
-  const [mode, setMode] = useState<SelectionMode>('all');
+  const { autobuses, loading } = useAutobuses();
   const [selectedImei, setSelectedImei] = useState<string | null>(null);
 
-  const imeis = useMemo(() => {
-    if (mode === 'single' && selectedImei) return [selectedImei];
-    return vehicles.map((v) => v.imei);
-  }, [mode, selectedImei, vehicles]);
-
-  const value: VehicleSelectionValue = {
-    mode,
-    setMode,
-    selectedImei: selectedImei ?? vehicles[0]?.imei ?? null,
-    setSelectedImei,
-    imeis,
-    vehicles,
-    loading,
-  };
-
-  return <VehicleSelectionContext.Provider value={value}>{children}</VehicleSelectionContext.Provider>;
+  return (
+    <VehicleSelectionContext.Provider value={{ selectedImei, setSelectedImei, autobuses, loading }}>
+      {children}
+    </VehicleSelectionContext.Provider>
+  );
 }
 
 export function useVehicleSelection() {
