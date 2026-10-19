@@ -22,24 +22,6 @@ export interface GpsRecord {
   numero_economico?: string | null; 
 }
 
-
-export interface Fuel5MinRecord {
-  id: string;
-  imei: string;
-  ventana_inicio: string;
-  ventana_fin: string;
-  litros_tanque: number | null;
-  sensor_mediana: number | null;
-  sensor_min: number | null;
-  sensor_max: number | null;
-  registros_usados: number;
-  odometro_total: number | null;
-  ignicion: boolean | null;
-  valido: boolean;
-  observacion: string | null;
-  numero_economico?: string | null;
-}
-
 export interface VehicleLatest {
   imei: string;
   recorded_at: string;
@@ -49,22 +31,6 @@ export interface VehicleLatest {
   heading: number;
   fuel: number;
   satellites: number;
-}
-
-export interface Kpis {
-  totalRecords: number;
-  maxSpeed: number;
-  avgSpeed: number;
-  maxFuel: number;
-  minFuel: number;
-}
-
-export interface HistoryRecord {
-  recorded_at: string;
-  speed: number;
-  fuel: number;
-  latitude: number;
-  longitude: number;
 }
 
 export interface ApiResponse<T> {
@@ -79,26 +45,6 @@ export interface FleetVehicle extends VehicleLatest {
   status: VehicleStatus;
 }
 
-export interface FleetSummary {
-  totalFuel: number;
-  avgPerformance: number;
-  performanceUnit: string;
-  refillsToday: number;
-  activeAlerts: number;
-  activeUnits: number;
-  totalUnits: number;
-}
-
-export interface PerformancePoint {
-  date: string;
-  [imei: string]: string | number;
-}
-
-export interface PerformanceSeriesResponse {
-  series: PerformancePoint[];
-  imeis: string[];
-}
-
 export interface FuelPoint {
   imei: string;
   numero_economico: string | number | null;
@@ -106,34 +52,7 @@ export interface FuelPoint {
   fuel: number | null;
 }
 
-export type FleetEventType = 'refill' | 'sudden_drop' | 'no_comm';
-
-export interface FleetEvent {
-  type: FleetEventType;
-  imei: string;
-  recorded_at: string;
-  fuel_before?: number;
-  fuel_after?: number;
-  delta?: number;
-  minutes_since?: number;
-  latitude: number;
-  longitude: number;
-}
-
-export interface FuelLoad extends FleetEvent {
-  liters_estimated: number | null;
-}
-
-export interface LowPerformanceUnit {
-  imei: string;
-  currentPerformance: number;
-  previousPerformance: number;
-  variationPct: number;
-}
-
 export type SelectionMode = 'single' | 'all';
-
-// ---- Agregar a ../types ----
 
 // Respuesta paginada de la API (ApiResponse + total)
 export interface PagedResponse<T> extends ApiResponse<T> {
