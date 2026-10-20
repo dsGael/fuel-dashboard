@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { Card } from '../ui/Card';
 
 // Punto devuelto por GET /api/fuel/processed/chart
@@ -8,10 +8,11 @@ export interface ProcessedPoint {
   imei: string;
   numero_economico: string | number | null;
   ventana_inicio: string;
-  //litros_calculados: number | null;
+  litros_calculados: number | null;
   litros_finales: number | null;
   estado_resultado?: string | null;
   actualizo_final?: boolean | null;
+  encendido?: boolean | null;
 }
 
 export interface ProcessedChartCardProps {
@@ -21,6 +22,8 @@ export interface ProcessedChartCardProps {
   yMax?: number;
   /** Marcas fijas del eje Y, p. ej. [0, 10, 20, 30, 40] */
   yTicks?: number[];
+  /** IMEI seleccionado: solo con un vehículo elegido se sombrea encendido/apagado */
+  selectedImei?: string | null;
 }
 
 interface SeriesDef {
@@ -30,17 +33,31 @@ interface SeriesDef {
   dashed: boolean;
 }
 
+interface StateRange {
+  x1: string;
+  x2: string;
+  encendido: boolean;
+}
+
 const COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
 
-export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartCardProps) {
-  const { chartData, series } = useMemo(() => {
-    if (!data || data.length === 0) return { chartData: [], series: [] as SeriesDef[] };
+export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: ProcessedChartCardProps) {
+  const { chartData, series, ranges } = useMemo(() => {
+    if (!data || data.length === 0) return { chartData: [], series: [] as SeriesDef[], ranges: [] as StateRange[] };
 
     const grouped: Record<string, Record<string, any>> = {};
     const unidades: string[] = []; // orden de aparición = color estable
     const etiquetas: Record<string, string> = {};
 
+    // Estado por ventana del vehículo seleccionado. Se registra aunque no haya litros,
+    // para que los extremos de las áreas existan como categorías del eje X.
+    const encendidoPorVentana: Record<string, boolean> = {};
+
     data.forEach((p) => {
+      if (selectedImei && p.imei === selectedImei && p.encendido != null) {
+        encendidoPorVentana[p.ventana_inicio] = p.encendido;
+        if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
+      }
       if (p.litros_finales == null) return;
 
       const unidad = p.numero_economico ? String(p.numero_economico) : String(p.idautobus ?? p.imei);
@@ -52,7 +69,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
       }
 
       if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
-      // if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
+       if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
       if (p.litros_finales != null) grouped[p.ventana_inicio][`u${idx}_fin`] = Number(p.litros_finales);
     });
 
@@ -62,12 +79,12 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
 
     // Dos líneas por unidad, mismo color: calculados punteada, finales sólida
     const defs: SeriesDef[] = unidades.flatMap((unidad, idx) => [
-      // {
-      //   dataKey: `u${idx}_calc`,
-      //   name: `${etiquetas[unidad]} · calculados`,
-      //   color: COLORS[idx % COLORS.length + 1],
-      //   dashed: true,
-      // },
+      {
+        dataKey: `u${idx}_calc`,
+        name: `${etiquetas[unidad]} · calculados`,
+        color: COLORS[idx % COLORS.length + 1],
+        dashed: true,
+      },
       {
         dataKey: `u${idx}_fin`,
         name: `${etiquetas[unidad]} · finales`,
@@ -76,8 +93,24 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
       },
     ]);
 
-    return { chartData: arregloFinal, series: defs };
-  }, [data]);
+    // Tramos consecutivos con el mismo estado; cada tramo llega hasta el inicio del siguiente punto
+    const rangos: StateRange[] = [];
+    let actual: StateRange | null = null;
+    arregloFinal.forEach((pt, i) => {
+      const est = encendidoPorVentana[pt.ventana_inicio];
+      if (est === undefined) return;
+      if (actual?.encendido === est) {
+        actual.x2 = pt.ventana_inicio;
+      } else {
+        if (actual) actual.x2 = pt.ventana_inicio;
+        actual = { x1: pt.ventana_inicio, x2: pt.ventana_inicio, encendido: est };
+        rangos.push(actual);
+      }
+      if (i === arregloFinal.length - 1) actual.x2 = pt.ventana_inicio;
+    });
+
+    return { chartData: arregloFinal, series: defs, ranges: rangos };
+  }, [data, selectedImei]);
 
   return (
     <Card title="Litros finales">
@@ -121,6 +154,17 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
 
           <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
 
+          {ranges.map((r, i) => (
+            <ReferenceArea
+              key={i}
+              x1={r.x1}
+              x2={r.x2}
+              fill={r.encendido ? '#22C55E' : '#EF4444'}
+              fillOpacity={0.12}
+              ifOverflow="visible"
+            />
+          ))}
+
           {series.map((s) => (
             <Line
               key={s.dataKey}
@@ -132,7 +176,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks }: ProcessedChartC
               strokeDasharray={s.dashed ? '5 4' : undefined}
               dot={false}
               activeDot={{ r: 5 }}
-              connectNulls={true}
+              connectNulls={false}
             />
           ))}
         </LineChart>

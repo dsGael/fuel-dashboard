@@ -109,7 +109,7 @@ return (
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
           </div>
         ) : (
-          <ConsumptionChartCard data={consumptionYARIS} yMax={7000} yMin={4500}  />
+          <ConsumptionChartCard data={consumptionYARIS} yMax={7000} yMin={2}  />
         )}
 
           YARIS EN LITROS
@@ -118,7 +118,7 @@ return (
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
           </div>
         ) : (
-          <ProcessedChartCard data={fuelProcessed}   />
+          <ProcessedChartCard data={fuelProcessed} selectedImei={selectedImei} yMax={42} yMin={3} />
         )}
         
 
