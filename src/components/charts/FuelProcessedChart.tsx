@@ -10,6 +10,7 @@ export interface ProcessedPoint {
   ventana_inicio: string;
   litros_calculados: number | null;
   litros_finales: number | null;
+  litros_estimados: number | null;
   estado_resultado?: string | null;
   actualizo_final?: boolean | null;
   encendido?: boolean | null;
@@ -31,6 +32,7 @@ interface SeriesDef {
   name: string;
   color: string;
   dashed: boolean;
+  dash?: string; // patrón propio de rayas; si falta y dashed, '5 4'
 }
 
 interface StateRange {
@@ -40,6 +42,12 @@ interface StateRange {
 }
 
 const COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
+
+const VISIBLE_SERIES = [
+  'calc',
+  // 'fin',
+  'est'
+  ] as const;
 
 export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: ProcessedChartCardProps) {
   const { chartData, series, ranges } = useMemo(() => {
@@ -69,15 +77,19 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
       }
 
       if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
-       if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
+      if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
       if (p.litros_finales != null) grouped[p.ventana_inicio][`u${idx}_fin`] = Number(p.litros_finales);
+      if (p.litros_estimados != null) grouped[p.ventana_inicio][`u${idx}_est`] = Number(p.litros_estimados);
+
     });
 
     const arregloFinal = Object.values(grouped).sort(
       (a, b) => new Date(a.ventana_inicio).getTime() - new Date(b.ventana_inicio).getTime()
     );
 
-    // Dos líneas por unidad, mismo color: calculados punteada, finales sólida
+    // Tres líneas por unidad: calculados (rayas), finales (sólida) y estimados (puntos, ámbar).
+    // Estimados = último nivel confiable menos lo consumido por km desde entonces: baja poco a
+    // poco durante el viaje, mientras los finales solo cambian cuando hay una lectura confiable.
     const defs: SeriesDef[] = unidades.flatMap((unidad, idx) => [
       {
         dataKey: `u${idx}_calc`,
@@ -90,6 +102,13 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
         name: `${etiquetas[unidad]} · finales`,
         color: COLORS[idx % COLORS.length],
         dashed: false,
+      },
+      {
+        dataKey: `u${idx}_est`,
+        name: `${etiquetas[unidad]} · estimados`,
+        color: COLORS[(idx + 2) % COLORS.length],
+        dashed: false,
+        dash: '2 3',
       },
     ]);
 
@@ -165,18 +184,18 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
             />
           ))}
 
-          {series.map((s) => (
-            <Line
+          {series.filter((s) => VISIBLE_SERIES.some((k) => s.dataKey.endsWith(`_${k}`))).map((s) => (
+              <Line
               key={s.dataKey}
               type="monotone"
               dataKey={s.dataKey}
               name={s.name}
               stroke={s.color}
               strokeWidth={2}
-              strokeDasharray={s.dashed ? '5 4' : undefined}
+              strokeDasharray={s.dashed ? (s.dash ?? '5 4') : undefined}
               dot={false}
               activeDot={{ r: 5 }}
-              connectNulls={false}
+              connectNulls={true}
             />
           ))}
         </LineChart>
