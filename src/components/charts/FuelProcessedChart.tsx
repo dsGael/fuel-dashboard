@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { Card } from '../ui/Card';
 
@@ -43,13 +43,53 @@ interface StateRange {
 
 const COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
 
-const VISIBLE_SERIES = [
-  'calc',
-  // 'fin',
-  'est'
-  ] as const;
+// Líneas que se pueden mostrar. La clave es el sufijo del dataKey (u0_calc -> 'calc').
+type SeriesKey = 'calc' | 'fin' | 'est';
+const SERIES_OPCIONES: { key: SeriesKey; label: string }[] = [
+  { key: 'calc', label: 'Calculados' },
+  { key: 'fin', label: 'Finales' },
+  { key: 'est', label: 'Estimados' },
+];
+
+// Líneas visibles al abrir, mientras el usuario no haya elegido otras. Quita las que no quieras.
+const VISIBLE_SERIES: SeriesKey[] = ['calc', 'fin', 'est'];
+
+// La elección del usuario se recuerda en su navegador.
+const STORAGE_KEY = 'elena.processedChart.series';
+
+function leerSeriesGuardadas(): SeriesKey[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const guardadas = JSON.parse(raw);
+      if (Array.isArray(guardadas)) {
+        const validas = SERIES_OPCIONES.map((o) => o.key).filter((k) => guardadas.includes(k));
+        if (validas.length > 0) return validas;
+      }
+    }
+  } catch {
+    // sin localStorage (modo privado, etc.): se usa la lista por defecto
+  }
+  return VISIBLE_SERIES;
+}
 
 export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: ProcessedChartCardProps) {
+  const [visibles, setVisibles] = useState<SeriesKey[]>(leerSeriesGuardadas);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(visibles));
+    } catch {
+      // no se pudo guardar: la elección vale solo para esta sesión
+    }
+  }, [visibles]);
+
+  const alternar = (key: SeriesKey) =>
+    setVisibles((prev) => {
+      const siguiente = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
+      return siguiente.length === 0 ? prev : siguiente; // siempre queda al menos una línea
+    });
+
   const { chartData, series, ranges } = useMemo(() => {
     if (!data || data.length === 0) return { chartData: [], series: [] as SeriesDef[], ranges: [] as StateRange[] };
 
@@ -77,7 +117,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
       }
 
       if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
-      if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
+       if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
       if (p.litros_finales != null) grouped[p.ventana_inicio][`u${idx}_fin`] = Number(p.litros_finales);
       if (p.litros_estimados != null) grouped[p.ventana_inicio][`u${idx}_est`] = Number(p.litros_estimados);
 
@@ -107,7 +147,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
         dataKey: `u${idx}_est`,
         name: `${etiquetas[unidad]} · estimados`,
         color: COLORS[(idx + 2) % COLORS.length],
-        dashed: false,
+        dashed: true,
         dash: '2 3',
       },
     ]);
@@ -133,6 +173,23 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
 
   return (
     <Card title="Litros finales">
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8, fontSize: 12, color: '#94A3B8' }}>
+        {SERIES_OPCIONES.map((o) => {
+          const activa = visibles.includes(o.key);
+          const ultima = activa && visibles.length === 1; // no se puede apagar la última
+          return (
+            <label
+              key={o.key}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: ultima ? 'not-allowed' : 'pointer' }}
+              title={ultima ? 'Debe quedar al menos una línea visible' : undefined}
+            >
+              <input type="checkbox" checked={activa} disabled={ultima} onChange={() => alternar(o.key)} />
+              {o.label}
+            </label>
+          );
+        })}
+      </div>
+
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#232A3B" />
@@ -184,8 +241,10 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
             />
           ))}
 
-          {series.filter((s) => VISIBLE_SERIES.some((k) => s.dataKey.endsWith(`_${k}`))).map((s) => (
-              <Line
+          {series
+            .filter((s) => visibles.some((k) => s.dataKey.endsWith(`_${k}`)))
+            .map((s) => (
+            <Line
               key={s.dataKey}
               type="monotone"
               dataKey={s.dataKey}
@@ -195,7 +254,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
               strokeDasharray={s.dashed ? (s.dash ?? '5 4') : undefined}
               dot={false}
               activeDot={{ r: 5 }}
-              connectNulls={true}
+              connectNulls={false}
             />
           ))}
         </LineChart>
