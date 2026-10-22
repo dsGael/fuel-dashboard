@@ -76,9 +76,18 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                     {new Date(record.recorded_at).toLocaleString('es-MX')}
                   </td>
                   <td className="py-2 pr-4">
-                    {record.latitude !== null && record.longitude !== null
-                      ? `${record.latitude.toFixed(5)}, ${record.longitude.toFixed(5)}`
-                      : 'N/A'}
+                    {record.latitude !== null && record.longitude !== null ? (
+                      <a
+                        href={`https://www.google.com/maps?q=${record.latitude},${record.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sky-400 hover:text-sky-300 hover:underline"
+                      >
+                        {`${record.latitude.toFixed(5)}, ${record.longitude.toFixed(5)}`}
+                      </a>
+                    ) : (
+                      'N/A'
+                    )}
                   </td>
                   <td className="py-2 pr-4">
                     {record.speed !== null ? `${record.speed} km/h` : '-'}
