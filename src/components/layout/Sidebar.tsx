@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router';
+import type { MouseEvent } from 'react';
 import clsx from 'clsx';
 import { Fuel, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 import { pages } from '../../pages';
@@ -11,6 +12,14 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, onClose, collapsed, onToggleCollapsed }: Readonly<SidebarProps>) {
+  // Contraída en escritorio: un clic en cualquier zona libre la expande.
+  // Los links y botones conservan su propia acción.
+  const handleAsideClick = (e: MouseEvent<HTMLElement>) => {
+    if (!collapsed || !window.matchMedia('(min-width: 1024px)').matches) return;
+    if ((e.target as HTMLElement).closest('a, button')) return;
+    onToggleCollapsed();
+  };
+
   return (
     <>
       {open && (
@@ -19,10 +28,11 @@ export function Sidebar({ open, onClose, collapsed, onToggleCollapsed }: Readonl
 
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-40 w-60 shrink-0 flex flex-col bg-card border-r border-border transition-all duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-40 w-60 shrink-0 flex flex-col bg-card border-r border-border transition-[width,translate] duration-50 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full',
-          collapsed && 'lg:w-16',
+          collapsed && 'lg:w-16 lg:cursor-pointer',
         )}
+        onClick={handleAsideClick}
       >
         <div
           className={clsx(
@@ -50,7 +60,7 @@ export function Sidebar({ open, onClose, collapsed, onToggleCollapsed }: Readonl
             aria-expanded={!collapsed}
             className="hidden lg:flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
           >
-            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            {collapsed ? <PanelLeftOpen className="h-4 w-4 "  /> : <PanelLeftClose className="h-4 w-4" />}
           </button>
         </div>
 

@@ -190,7 +190,8 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
         })}
       </div>
 
-      <ResponsiveContainer width="100%" height={280}>
+      {/* debounce > duración de la animación de la sidebar (200 ms): redibuja una sola vez al terminar */}
+      <ResponsiveContainer width="100%" height={280} debounce={500}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#232A3B" />
 

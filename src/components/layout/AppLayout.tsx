@@ -36,7 +36,7 @@ export function AppLayout() {
         onToggleCollapsed={toggleCollapsed}
       />
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 overflow-x-hidden">
         <div className="lg:hidden flex items-center h-14 px-4 border-b border-border bg-card">
           <button
             onClick={() => setSidebarOpen(true)}
