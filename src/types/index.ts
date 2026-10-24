@@ -39,6 +39,8 @@ export interface FuelPoint {
   numero_economico: string | number | null;
   recorded_at: string;
   fuel: number | null;
+  inclinacion_horizontal?: number | null;
+  inclinacion_vertical?: number | null;
 }
 
 // Respuesta paginada de la API (ApiResponse + total)

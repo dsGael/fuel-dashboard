@@ -8,6 +8,8 @@ interface FuelPoint {
   numero_economico: string | number | null;
   recorded_at: string;
   fuel: number | null;
+  inclinacion_horizontal?: number | null;
+  inclinacion_vertical?: number | null;
 }
 
 interface ConsumptionChartCardProps {
@@ -38,6 +40,10 @@ export function ConsumptionChartCard({ data, yMin, yMax, yTicks }: ConsumptionCh
         ? String(punto.numero_economico)
         : String(punto.imei);
       grouped[punto.recorded_at][identificador] = Number(punto.fuel);
+      grouped[punto.recorded_at][`${identificador}__incl`] = [
+        punto.inclinacion_horizontal,
+        punto.inclinacion_vertical,
+      ];
       seriesUnicas.add(identificador);
     });
 
@@ -87,6 +93,11 @@ export function ConsumptionChartCard({ data, yMin, yMax, yTicks }: ConsumptionCh
                 ? ''
                 : new Date(String(label)).toLocaleString('es-MX', { timeZone: 'America/Hermosillo' })
             }
+            formatter={(value, name, item) => {
+              const [h, v] = item.payload?.[`${item.dataKey}__incl`] ?? [];
+              const deg = (n?: number | null) => (n == null ? '—' : `${Number(n).toFixed(1)}°`);
+              return [`${value} · Incl. H ${deg(h)} · V ${deg(v)}`, name];
+            }}
           />
 
           <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
