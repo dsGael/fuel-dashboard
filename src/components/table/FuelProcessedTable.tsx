@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo } from 'react';
 import { Card } from '../ui/Card';
 import type { FuelProcessedRecord } from '../../types';
 
@@ -36,21 +36,10 @@ function formatValue(value: FuelProcessedRecord[keyof FuelProcessedRecord]) {
   return value;
 }
 
-const cellBase: CSSProperties = {
-  padding: '8px 12px',
-  whiteSpace: 'nowrap',
-  borderBottom: '1px solid #232A3B',
-};
+const cellBase = 'px-3 py-2 whitespace-nowrap border-b border-border';
 
-const buttonStyle = (disabled: boolean): CSSProperties => ({
-  background: '#161B29',
-  color: disabled ? '#475569' : '#E2E8F0',
-  border: '1px solid #232A3B',
-  borderRadius: 6,
-  padding: '4px 12px',
-  fontSize: 12,
-  cursor: disabled ? 'not-allowed' : 'pointer',
-});
+const buttonClass =
+  'rounded-md border border-border bg-card px-3 py-1 text-xs text-slate-200 cursor-pointer disabled:text-slate-600 disabled:cursor-not-allowed';
 
 export function FuelProcessedTable({
   rows,
@@ -75,33 +64,24 @@ export function FuelProcessedTable({
   return (
     <Card title="Combustible procesado">
       {error && (
-        <div style={{ color: '#EF4444', fontSize: 13, marginBottom: 8 }}>
+        <div className="mb-2 text-[13px] text-accent-red">
           {error}
           {onRefresh && (
-            <button onClick={onRefresh} style={{ ...buttonStyle(false), marginLeft: 8 }}>
+            <button onClick={onRefresh} className={`${buttonClass} ml-2`}>
               Reintentar
             </button>
           )}
         </div>
       )}
 
-      <div style={{ overflowX: 'auto', maxHeight: 420, opacity: loading ? 0.6 : 1 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, color: '#E2E8F0' }}>
+      <div className={`overflow-auto max-h-105 ${loading ? 'opacity-60' : ''}`}>
+        <table className="w-full border-collapse text-xs text-slate-200">
           <thead>
             <tr>
               {columns.map((col) => (
                 <th
                   key={col}
-                  style={{
-                    ...cellBase,
-                    position: 'sticky',
-                    top: 0,
-                    background: '#161B29',
-                    color: '#64748B',
-                    textAlign: 'left',
-                    textTransform: 'uppercase',
-                    fontSize: 11,
-                  }}
+                  className={`${cellBase} sticky top-0 bg-card text-left text-[11px] uppercase text-slate-500`}
                 >
                   {formatHeader(col)}
                 </th>
@@ -112,7 +92,7 @@ export function FuelProcessedTable({
             {rows.map((row, i) => (
               <tr key={i}>
                 {columns.map((col) => (
-                  <td key={col} style={cellBase}>
+                  <td key={col} className={cellBase}>
                     {formatValue(row[col as keyof FuelProcessedRecord])}
                   </td>
                 ))}
@@ -120,7 +100,7 @@ export function FuelProcessedTable({
             ))}
             {!loading && !error && rows.length === 0 && (
               <tr>
-                <td colSpan={Math.max(columns.length, 1)} style={{ ...cellBase, textAlign: 'center', color: '#64748B' }}>
+                <td colSpan={Math.max(columns.length, 1)} className={`${cellBase} text-center text-slate-500`}>
                   Sin registros
                 </td>
               </tr>
@@ -129,31 +109,18 @@ export function FuelProcessedTable({
         </table>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: 12,
-          fontSize: 12,
-          color: '#64748B',
-        }}
-      >
+      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
         <span>
           {from}–{to} de {total.toLocaleString('es-MX')}
         </span>
-        <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button style={buttonStyle(page === 0)} disabled={page === 0} onClick={() => onPageChange(page - 1)}>
+        <span className="flex items-center gap-2">
+          <button className={buttonClass} disabled={page === 0} onClick={() => onPageChange(page - 1)}>
             Anterior
           </button>
           <span>
             Página {page + 1} / {totalPages}
           </span>
-          <button
-            style={buttonStyle(page + 1 >= totalPages)}
-            disabled={page + 1 >= totalPages}
-            onClick={() => onPageChange(page + 1)}
-          >
+          <button className={buttonClass} disabled={page + 1 >= totalPages} onClick={() => onPageChange(page + 1)}>
             Siguiente
           </button>
         </span>

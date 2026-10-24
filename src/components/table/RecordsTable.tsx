@@ -36,9 +36,9 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
 
   return (
     <Card title={`Historial de registros GPS (${records.length})`}>
-      {/* Contenedor limpio sin overflow para que el sticky funcione con la ventana del navegador */}
-      <div className="w-full">
-        <table className="w-full min-w-[300px] text-left text-xs">
+      {/* Scroll propio (horizontal y vertical) para que sea usable en móvil; el thead queda sticky dentro */}
+      <div className="w-full overflow-auto max-h-105">
+        <table className="w-full whitespace-nowrap text-left text-xs">
           <thead className="bg-slate-800 text-slate-400 sticky top-0 z-10 px-5">
             <tr className="border-b border-border text-slate-400 text-center">
               <th className="py-2 pr-4">Unidad</th>
