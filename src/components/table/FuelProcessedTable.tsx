@@ -23,7 +23,7 @@ const TZ = 'America/Hermosillo';
 const VISIBLE_COLUMNS: string[] = ['numero_economico', 'recorded_at', 'ventana_inicio', 'ventana_fin', 'litros_calculados', 'litros_finales',  'diferencia_litros',  'consumo_esperado',  'actualizo_final', 'estado_resultado', 'motivo'];
 
 function formatHeader(key: string) {
-  return key.replace(/_/g, ' ');
+  return key.replaceAll('_', ' ');
 }
 
 function formatValue(value: FuelProcessedRecord[keyof FuelProcessedRecord]) {
@@ -50,7 +50,7 @@ export function FuelProcessedTable({
   error,
   onPageChange,
   onRefresh,
-}: FuelProcessedTableProps) {
+}: Readonly<FuelProcessedTableProps>) {
   const columns = useMemo(() => {
     const keys = rows.length ? Object.keys(rows[0]) : [];
     if (VISIBLE_COLUMNS.length === 0) return keys;

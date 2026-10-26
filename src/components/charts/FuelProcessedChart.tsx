@@ -255,7 +255,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
               strokeDasharray={s.dashed ? (s.dash ?? '5 4') : undefined}
               dot={false}
               activeDot={{ r: 5 }}
-              connectNulls={false}
+              connectNulls={true}
             />
           ))}
         </LineChart>

@@ -3,6 +3,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { VehicleSelectionProvider } from './context/VehicleSelectionContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { pages } from './pages';
+import { LoginPage } from './pages/LoginPage';
+import { getToken } from './api/client';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -13,13 +15,19 @@ const queryClient = new QueryClient({
   },
 });
 
+// Componente propio para que el token se revise en cada navegación, no solo al montar App
+function RequireAuth() {
+  return getToken() ? <AppLayout /> : <Navigate to="/login" replace />;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <VehicleSelectionProvider>
         <BrowserRouter>
           <Routes>
-            <Route element={<AppLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route element={<RequireAuth />}>
               {pages.map(({ path, component: Page }) => (
                 <Route key={path} path={path} element={<Page />} />
               ))}

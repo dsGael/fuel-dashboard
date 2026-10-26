@@ -13,6 +13,46 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3002/api',
 });
 
+const TOKEN_KEY = 'auth-token';
+
+export function logout() {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // sin localStorage no hay sesión guardada que borrar
+  }
+}
+
+// Devuelve el token guardado solo si sigue vigente según el `exp` del JWT
+export function getToken() {
+  try {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload.exp * 1000 > Date.now()) return token;
+  } catch {
+    // token malformado: se trata como sesión inválida
+  }
+  logout();
+  return null;
+}
+
+export async function login(correo: string, password: string) {
+  const { data } = await api.post<{ token: string }>('/auth/login', { correo, password });
+  try {
+    localStorage.setItem(TOKEN_KEY, data.token);
+  } catch {
+    // sin localStorage la sesión no sobrevive la recarga
+  }
+  return data.token;
+}
+
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 interface RangeParams {
   startDate?: string;
   endDate?: string;

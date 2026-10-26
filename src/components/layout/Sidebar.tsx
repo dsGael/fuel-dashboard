@@ -1,8 +1,9 @@
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import type { MouseEvent } from 'react';
 import clsx from 'clsx';
-import { Fuel, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
+import { Fuel, LogOut, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 import { pages } from '../../pages';
+import { logout } from '../../api/client';
 
 interface SidebarProps {
   open: boolean; // panel abierto en celular
@@ -12,6 +13,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, onClose, collapsed, onToggleCollapsed }: Readonly<SidebarProps>) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   // Contraída en escritorio: un clic en cualquier zona libre la expande.
   // Los links y botones conservan su propia acción.
   const handleAsideClick = (e: MouseEvent<HTMLElement>) => {
@@ -87,6 +95,20 @@ export function Sidebar({ open, onClose, collapsed, onToggleCollapsed }: Readonl
             </NavLink>
           ))}
         </nav>
+
+        <div className="p-3 border-t border-border">
+          <button
+            onClick={handleLogout}
+            title={collapsed ? 'Cerrar sesión' : undefined}
+            className={clsx(
+              'w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors',
+              collapsed && 'lg:justify-center lg:px-0',
+            )}
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span className={clsx('whitespace-nowrap', collapsed && 'lg:hidden')}>Cerrar sesión</span>
+          </button>
+        </div>
       </aside>
     </>
   );
