@@ -108,7 +108,7 @@ return (
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
           </div>
         ) : (
-          <ProcessedChartCard data={fuelProcessed} selectedImei={selectedImei} yMax={42} yMin={3} />
+          <ProcessedChartCard data={fuelProcessed} selectedImei={selectedImei} yMax={65} yMin={0} />
         )}
         
 
