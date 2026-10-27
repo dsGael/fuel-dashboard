@@ -54,12 +54,15 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
               <th className="py-2 pr-4">Inclinación (H / V)</th>
               <th className="py-2 pr-4">Sensor Análogo</th>
               <th className="py-2 pr-4">Sensor Externo</th>
+              <th className="py-2 pr-4">Eje X</th>
+              <th className="py-2 pr-4">Eje Y</th>
+              <th className="py-2 pr-4">Eje Z</th>
             </tr>
           </thead>
           <tbody>
             {currentRecords.length === 0 ? (
               <tr className="border-b border-border/50 hover:bg-white/5">
-                <td colSpan={13} className="py-4 text-center text-slate-500">
+                <td colSpan={16} className="py-4 text-center text-slate-500">
                   No hay registros en la base de datos.
                 </td>
               </tr>
@@ -127,6 +130,12 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                   <td className="py-2 pr-4 text-slate-400">
                     {record.fuel ?? '-'}
                   </td>
+                  {/* Teltonika IO 17/18/19 = eje X/Y/Z */}
+                  {['17', '18', '19'].map((id) => (
+                    <td key={id} className="py-2 pr-4">
+                      {record.io_data?.[id] ?? '-'}
+                    </td>
+                  ))}
                 </tr>
               ))
             )}

@@ -20,6 +20,7 @@ export interface GpsRecord {
   inclinacion_horizontal: number | null;
   inclinacion_vertical: number | null;
   numero_economico?: string | null; 
+  
 }
 
 export interface ApiResponse<T> {

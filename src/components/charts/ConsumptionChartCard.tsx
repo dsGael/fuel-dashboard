@@ -23,7 +23,7 @@ interface ConsumptionChartCardProps {
 
 const COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
 
-export function ConsumptionChartCard({ data, yMin, yMax, yTicks }: ConsumptionChartCardProps) {
+export function ConsumptionChartCard({ data, yMin, yMax, yTicks }: Readonly<ConsumptionChartCardProps>) {
   const { chartData, lineKeys } = useMemo(() => {
     if (!data || data.length === 0) return { chartData: [], lineKeys: [] as string[] };
 

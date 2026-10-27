@@ -34,8 +34,6 @@ const { data: consumption = [],
    isLoading: isLoadingConsumption } = useConsumption(selectedImei, startDateTime, endDateTime);
 
    
-const { data: consumptionYARIS = [],
-   isLoading: isLoadingConsumptionYARIS } = useConsumptionYARIS(selectedImei, startDateTime, endDateTime);
 
   const { data: fuelProcessed = [],
    isLoading: isLoadingFuelProcessed } = useFuelProcessedChart(selectedImei, startDateTime, endDateTime);
@@ -83,26 +81,7 @@ return (
         </div>
       </header>
      
-
-        CORBER SENSOR CRUDO
-             {isLoadingConsumption ? (
-          <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
-            <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
-          </div>
-        ) : (
-          <ConsumptionChartCard data={consumption} yMin={0} yMax={3000}  />
-        )}
-
-          YARIS SENSOR CRUDO
-           {isLoadingConsumptionYARIS ? (
-          <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
-            <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
-          </div>
-        ) : (
-          <ConsumptionChartCard data={consumptionYARIS} yMax={7000} yMin={2}  />
-        )}
-
-          YARIS EN LITROS
+           EN LITROS
            {isLoadingFuelProcessed ? (
           <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
@@ -111,6 +90,17 @@ return (
           <ProcessedChartCard data={fuelProcessed} selectedImei={selectedImei} yMax={65} yMin={0} />
         )}
         
+
+         SENSOR CRUDO
+             {isLoadingConsumption ? (
+          <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
+            <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
+          </div>
+        ) : (
+          <ConsumptionChartCard data={consumption} yMin={0} yMax={3000}  />
+        )}
+
+
 
       <FuelProcessedTable
         rows={rows}
