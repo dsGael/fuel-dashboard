@@ -52,26 +52,32 @@ export interface PagedResponse<T> extends ApiResponse<T> {
   offset: number;
 }
 
+// Fila de GET /api/fuel/processed (fuel_windows + idautobus y numero_economico)
 export interface FuelProcessedRecord {
-  id: string | number;
-  ventana_id: string | number | null;
-  ventana_inicio: string;
-  fecha_proceso: string | null;
+  id: string;
   imei: string;
-  idautobus: number | null;
+  ventana_inicio: string;
+  ventana_fin: string;
+  muestras_totales: number | null;
+  muestras_validas: number | null;
+  sensor_mediana: number | null;
+  sensor_promedio: number | null;
+  sensor_min: number | null;
+  sensor_max: number | null;
+  inclinacion_mediana: number | null;
+  angulo_corregido: number | null;
+  porcentaje_angulo_valido: number | null;
+  velocidad_promedio: number | null;
+  ignicion_dominante: boolean | null;
+  odometro_total: number | null;
+  calidad_ventana: string | null;
+  motivo_calidad: string | null;
+  created_at: string;
+  litros: number | null;
+  estado_calibracion: string | null;
+  idautobus: string | null;
   numero_economico?: string | number | null;
   litros_calculados: number | null;
-  litros_finales: number | null;
-  ultimo_valor_confiable_anterior: number | null;
-  diferencia_litros: number | null;
-  km_desde_ultimo_confiable: number | null;
-  rendimiento_usado: number | null;
-  consumo_esperado: number | null;
-  exceso_no_explicado: number | null;
-  calibracion_version_usada: string | number | null;
-  actualizo_final: boolean | null;
-  estado_resultado: string | null;
-  motivo: string | null;
 }
 
 export interface FuelProcessedQuery {

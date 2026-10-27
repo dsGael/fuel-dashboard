@@ -1,19 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { Card } from '../ui/Card';
 
-// Punto devuelto por GET /api/fuel/processed/chart
+// Punto devuelto por GET /api/fuel/processed/chart (una fila por ventana de 5 min)
 export interface ProcessedPoint {
   idautobus: string;
   imei: string;
   numero_economico: string | number | null;
   ventana_inicio: string;
-  litros_calculados: number | null;
-  litros_finales: number | null;
-  litros_estimados: number | null;
-  estado_resultado?: string | null;
-  actualizo_final?: boolean | null;
-  encendido?: boolean | null;
+  ventana_fin: string;
+  litros: number | null;
+  calidad_ventana?: string | null;
+  motivo_calidad?: string | null;
+  encendido?: boolean | null; // ignición dominante de la ventana
 }
 
 export interface ProcessedChartCardProps {
@@ -31,8 +30,6 @@ interface SeriesDef {
   dataKey: string; // sin puntos: Recharts interpreta "." como ruta anidada
   name: string;
   color: string;
-  dashed: boolean;
-  dash?: string; // patrón propio de rayas; si falta y dashed, '5 4'
 }
 
 interface StateRange {
@@ -41,61 +38,14 @@ interface StateRange {
   encendido: boolean;
 }
 
-const COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
-
-// Líneas que se pueden mostrar. La clave es el sufijo del dataKey (u0_calc -> 'calc').
-type SeriesKey = 'calc' | 'fin' | 'est';
-const SERIES_OPCIONES: { key: SeriesKey; label: string }[] = [
-  { key: 'calc', label: 'Calculados' },
-  { key: 'fin', label: 'Finales' },
-  { key: 'est', label: 'Estimados' },
-];
-
-// Líneas visibles al abrir, mientras el usuario no haya elegido otras. Quita las que no quieras.
-const VISIBLE_SERIES: SeriesKey[] = ['calc', 'fin', 'est'];
-
-// La elección del usuario se recuerda en su navegador.
-const STORAGE_KEY = 'elena.processedChart.series';
-
-function leerSeriesGuardadas(): SeriesKey[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const guardadas = JSON.parse(raw);
-      if (Array.isArray(guardadas)) {
-        const validas = SERIES_OPCIONES.map((o) => o.key).filter((k) => guardadas.includes(k));
-        if (validas.length > 0) return validas;
-      }
-    }
-  } catch {
-    // sin localStorage (modo privado, etc.): se usa la lista por defecto
-  }
-  return VISIBLE_SERIES;
-}
+const COLORS = ['#22C55E', '#F59E0B', '#F59E0B', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
 
 export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: ProcessedChartCardProps) {
-  const [visibles, setVisibles] = useState<SeriesKey[]>(leerSeriesGuardadas);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(visibles));
-    } catch {
-      // no se pudo guardar: la elección vale solo para esta sesión
-    }
-  }, [visibles]);
-
-  const alternar = (key: SeriesKey) =>
-    setVisibles((prev) => {
-      const siguiente = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
-      return siguiente.length === 0 ? prev : siguiente; // siempre queda al menos una línea
-    });
-
   const { chartData, series, ranges } = useMemo(() => {
     if (!data || data.length === 0) return { chartData: [], series: [] as SeriesDef[], ranges: [] as StateRange[] };
 
     const grouped: Record<string, Record<string, any>> = {};
     const unidades: string[] = []; // orden de aparición = color estable
-    const etiquetas: Record<string, string> = {};
 
     // Estado por ventana del vehículo seleccionado. Se registra aunque no haya litros,
     // para que los extremos de las áreas existan como categorías del eje X.
@@ -106,51 +56,28 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
         encendidoPorVentana[p.ventana_inicio] = p.encendido;
         if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
       }
-      if (p.litros_finales == null) return;
+      if (p.litros == null) return;
 
       const unidad = p.numero_economico ? String(p.numero_economico) : String(p.idautobus ?? p.imei);
       let idx = unidades.indexOf(unidad);
       if (idx === -1) {
         unidades.push(unidad);
         idx = unidades.length - 1;
-        etiquetas[unidad] = unidad.length > 10 ? `...${unidad.slice(-4)}` : `Unidad ${unidad}`;
       }
 
       if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
-       if (p.litros_calculados != null) grouped[p.ventana_inicio][`u${idx}_calc`] = Number(p.litros_calculados);
-      if (p.litros_finales != null) grouped[p.ventana_inicio][`u${idx}_fin`] = Number(p.litros_finales);
-      if (p.litros_estimados != null) grouped[p.ventana_inicio][`u${idx}_est`] = Number(p.litros_estimados);
-
+      grouped[p.ventana_inicio][`u${idx}`] = Number(p.litros);
     });
 
     const arregloFinal = Object.values(grouped).sort(
       (a, b) => new Date(a.ventana_inicio).getTime() - new Date(b.ventana_inicio).getTime()
     );
 
-    // Tres líneas por unidad: calculados (rayas), finales (sólida) y estimados (puntos, ámbar).
-    // Estimados = último nivel confiable menos lo consumido por km desde entonces: baja poco a
-    // poco durante el viaje, mientras los finales solo cambian cuando hay una lectura confiable.
-    const defs: SeriesDef[] = unidades.flatMap((unidad, idx) => [
-      {
-        dataKey: `u${idx}_calc`,
-        name: `${etiquetas[unidad]} · calculados`,
-        color: COLORS[idx % COLORS.length + 1],
-        dashed: true,
-      },
-      {
-        dataKey: `u${idx}_fin`,
-        name: `${etiquetas[unidad]} · finales`,
-        color: COLORS[idx % COLORS.length],
-        dashed: false,
-      },
-      {
-        dataKey: `u${idx}_est`,
-        name: `${etiquetas[unidad]} · estimados`,
-        color: COLORS[(idx + 2) % COLORS.length],
-        dashed: true,
-        dash: '2 3',
-      },
-    ]);
+    const defs: SeriesDef[] = unidades.map((unidad, idx) => ({
+      dataKey: `u${idx}`,
+      name: unidad.length > 10 ? `...${unidad.slice(-4)}` : `Unidad ${unidad}`,
+      color: COLORS[idx % COLORS.length],
+    }));
 
     // Tramos consecutivos con el mismo estado; cada tramo llega hasta el inicio del siguiente punto
     const rangos: StateRange[] = [];
@@ -172,24 +99,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
   }, [data, selectedImei]);
 
   return (
-    <Card title="Litros finales">
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8, fontSize: 12, color: '#94A3B8' }}>
-        {SERIES_OPCIONES.map((o) => {
-          const activa = visibles.includes(o.key);
-          const ultima = activa && visibles.length === 1; // no se puede apagar la última
-          return (
-            <label
-              key={o.key}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: ultima ? 'not-allowed' : 'pointer' }}
-              title={ultima ? 'Debe quedar al menos una línea visible' : undefined}
-            >
-              <input type="checkbox" checked={activa} disabled={ultima} onChange={() => alternar(o.key)} />
-              {o.label}
-            </label>
-          );
-        })}
-      </div>
-
+    <Card title="Litros por ventana">
       {/* debounce > duración de la animación de la sidebar (200 ms): redibuja una sola vez al terminar */}
       <ResponsiveContainer width="100%" height={280} debounce={500}>
         <LineChart data={chartData}>
@@ -242,9 +152,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
             />
           ))}
 
-          {series
-            .filter((s) => visibles.some((k) => s.dataKey.endsWith(`_${k}`)))
-            .map((s) => (
+          {series.map((s) => (
             <Line
               key={s.dataKey}
               type="monotone"
@@ -252,7 +160,6 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
               name={s.name}
               stroke={s.color}
               strokeWidth={2}
-              strokeDasharray={s.dashed ? (s.dash ?? '5 4') : undefined}
               dot={false}
               activeDot={{ r: 5 }}
               connectNulls={true}

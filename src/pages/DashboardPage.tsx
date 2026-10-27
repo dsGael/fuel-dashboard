@@ -4,7 +4,7 @@ import { useVehicleSelection } from '../context/VehicleSelectionContext';
 import RecordsTable from '../components/table/RecordsTable';
 import { getRecords } from '../api/client';
 import { ConsumptionChartCard } from '../components/charts/ConsumptionChartCard';
-import { useConsumption, useConsumptionYARIS, useFuelProcessedChart } from '../hooks/useConsumption';
+import { useConsumption, useFuelProcessedChart } from '../hooks/useConsumption';
 import { VehicleSelector } from '../components/controls/VehicleSelector';
 import { DateRangePicker } from '../components/controls/DateRangePicker';
 import type { GpsRecord } from '../types';

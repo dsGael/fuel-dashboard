@@ -20,7 +20,27 @@ const TZ = 'America/Hermosillo';
 // Usa los nombres tal como los devuelve la API (p. ej. 'litros_calculados').
 // Si el arreglo queda vacío, se muestran todas las columnas.
 // Los nombres que no existan en la respuesta se ignoran sin error.
-const VISIBLE_COLUMNS: string[] = ['numero_economico', 'recorded_at', 'ventana_inicio', 'ventana_fin', 'litros_calculados', 'litros_finales',  'diferencia_litros',  'consumo_esperado',  'actualizo_final', 'estado_resultado', 'motivo'];
+const VISIBLE_COLUMNS: string[] = [
+  'numero_economico',
+  'ventana_inicio',
+  'ventana_fin',
+  'litros',
+  'estado_calibracion',
+  'calidad_ventana',
+  'motivo_calidad',
+  'muestras_totales',
+  'muestras_validas',
+  'sensor_mediana',
+  'sensor_promedio',
+  'sensor_min',
+  'sensor_max',
+  'inclinacion_mediana',
+  'angulo_corregido',
+  'porcentaje_angulo_valido',
+  'velocidad_promedio',
+  'ignicion_dominante',
+  'odometro_total',
+];
 
 function formatHeader(key: string) {
   return key.replaceAll('_', ' ');
