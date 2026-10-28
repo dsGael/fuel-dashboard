@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import type { GpsRecord } from '../../types';
 
+const MANIOBRAS: Record<number, string> = { 1: 'Aceleración', 2: 'Frenado', 3: 'Giro brusco' };
+
 interface RecordsTableProps {
   records: GpsRecord[];
   loading: boolean;
@@ -56,12 +58,15 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
               <th className="py-2 pr-4">Eje X</th>
               <th className="py-2 pr-4">Eje Y</th>
               <th className="py-2 pr-4">Eje Z</th>
+              <th className="py-2 pr-4">Maniobra</th>
+              <th className="py-2 pr-4">Intensidad</th>
+              <th className="py-2 pr-4">Duración</th>
             </tr>
           </thead>
           <tbody>
             {currentRecords.length === 0 ? (
               <tr className="border-b border-border/50 hover:bg-white/5">
-                <td colSpan={16} className="py-4 text-center text-slate-500">
+                <td colSpan={19} className="py-4 text-center text-slate-500">
                   No hay registros en la base de datos.
                 </td>
               </tr>
@@ -133,6 +138,18 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                       {record.io_data?.[id] ?? '-'}
                     </td>
                   ))}
+                  {/* Teltonika IO 253 = maniobra, 254 = intensidad (centésimas de g), 243 = duración (ms) */}
+                  <td className="py-2 pr-4 text-center">
+                    {record.io_data?.['253'] != null
+                      ? (MANIOBRAS[record.io_data['253']] ?? record.io_data['253'])
+                      : '-'}
+                  </td>
+                  <td className="py-2 pr-4">
+                    {record.io_data?.['254'] != null ? `${(record.io_data['254'] / 100).toFixed(2)} g` : '-'}
+                  </td>
+                  <td className="py-2 pr-4">
+                    {record.io_data?.['243'] != null ? `${(record.io_data['243'] / 1000).toFixed(1)} s` : '-'}
+                  </td>
                 </tr>
               ))
             )}
