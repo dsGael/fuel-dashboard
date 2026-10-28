@@ -10,6 +10,8 @@ export interface ProcessedPoint {
   ventana_inicio: string;
   ventana_fin: string;
   litros: number | null;
+  litros_estimados?: number | null;
+  litros_calculados?: number | null;
   calidad_ventana?: string | null;
   motivo_calidad?: string | null;
   encendido?: boolean | null; // ignición dominante de la ventana
@@ -30,6 +32,8 @@ interface SeriesDef {
   dataKey: string; // sin puntos: Recharts interpreta "." como ruta anidada
   name: string;
   color: string;
+  dash?: string;
+  opacity?: number;
 }
 
 interface StateRange {
@@ -38,9 +42,9 @@ interface StateRange {
   encendido: boolean;
 }
 
-const COLORS = ['#22C55E', '#F59E0B', '#F59E0B', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
+const COLORS = ['#06B6D4', '#A855F7', '#EC4899', '#EF4444', '#A855F7', '#06B6D4', '#EC4899'];
 
-export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: ProcessedChartCardProps) {
+export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: Readonly<ProcessedChartCardProps>) {
   const { chartData, series, ranges } = useMemo(() => {
     if (!data || data.length === 0) return { chartData: [], series: [] as SeriesDef[], ranges: [] as StateRange[] };
 
@@ -56,7 +60,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
         encendidoPorVentana[p.ventana_inicio] = p.encendido;
         if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
       }
-      if (p.litros == null) return;
+      if (p.litros == null && p.litros_estimados == null && p.litros_calculados == null) return;
 
       const unidad = p.numero_economico ? String(p.numero_economico) : String(p.idautobus ?? p.imei);
       let idx = unidades.indexOf(unidad);
@@ -66,18 +70,25 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
       }
 
       if (!grouped[p.ventana_inicio]) grouped[p.ventana_inicio] = { ventana_inicio: p.ventana_inicio };
-      grouped[p.ventana_inicio][`u${idx}`] = Number(p.litros);
+      const fila = grouped[p.ventana_inicio];
+      if (p.litros != null) fila[`u${idx}`] = Number(p.litros);
+      if (p.litros_estimados != null) fila[`u${idx}e`] = Number(p.litros_estimados);
+      if (p.litros_calculados != null) fila[`u${idx}c`] = Number(p.litros_calculados);
     });
 
     const arregloFinal = Object.values(grouped).sort(
       (a, b) => new Date(a.ventana_inicio).getTime() - new Date(b.ventana_inicio).getTime()
     );
 
-    const defs: SeriesDef[] = unidades.map((unidad, idx) => ({
-      dataKey: `u${idx}`,
-      name: unidad.length > 10 ? `...${unidad.slice(-4)}` : `Unidad ${unidad}`,
-      color: COLORS[idx % COLORS.length],
-    }));
+    // Por unidad: litros con el color de la unidad; estimados siempre en amarillo (fuera de COLORS) para distinguirla
+    const defs: SeriesDef[] = unidades.flatMap((unidad, idx) => {
+      const name = unidad.length > 10 ? `...${unidad.slice(-4)}` : `Unidad ${unidad}`;
+      const color = COLORS[idx % COLORS.length];
+      return [
+        { dataKey: `u${idx}`, name, color, dash: '5 5', opacity: 0.8 },
+        { dataKey: `u${idx}e`, name: `${name} estimados`, color: '#f5f10a', dash: 'dotted' },
+      ];
+    });
 
     // Tramos consecutivos con el mismo estado; cada tramo llega hasta el inicio del siguiente punto
     const rangos: StateRange[] = [];
@@ -146,8 +157,8 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
               key={i}
               x1={r.x1}
               x2={r.x2}
-              fill={r.encendido ? '#22C55E' : '#EF4444'}
-              fillOpacity={0.12}
+              fill={r.encendido ? '#15e863' : '#EF4444'}
+              fillOpacity={0.30}
               ifOverflow="visible"
             />
           ))}
@@ -159,6 +170,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: P
               dataKey={s.dataKey}
               name={s.name}
               stroke={s.color}
+              strokeDasharray={s.dash}
               strokeWidth={2}
               dot={false}
               activeDot={{ r: 5 }}

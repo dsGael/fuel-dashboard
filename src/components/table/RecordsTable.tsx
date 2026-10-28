@@ -52,7 +52,6 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
               <th className="py-2 pr-4">Odómetro Viaje</th>
               <th className="py-2 pr-4">Ralentí</th>
               <th className="py-2 pr-4">Inclinación (H / V)</th>
-              <th className="py-2 pr-4">Sensor Análogo</th>
               <th className="py-2 pr-4">Sensor Externo</th>
               <th className="py-2 pr-4">Eje X</th>
               <th className="py-2 pr-4">Eje Y</th>
@@ -124,10 +123,8 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                       ? `${record.inclinacion_horizontal.toFixed(1)}° / ${record.inclinacion_vertical.toFixed(1)}°`
                       : '-'}
                   </td>
-                  <td className="py-2 pr-4">
-                    {record.s_analogo ?? '-'}
-                  </td>
-                  <td className="py-2 pr-4 text-slate-400">
+             
+                  <td className="py-2 pr-4 ">
                     {record.fuel ?? '-'}
                   </td>
                   {/* Teltonika IO 17/18/19 = eje X/Y/Z */}
