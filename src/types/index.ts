@@ -80,6 +80,38 @@ export interface FuelProcessedRecord {
   litros_calculados: number | null;
 }
 
+// Fila de GET /api/fuel/eventos
+export interface FuelEvento {
+  id: string;
+  idautobus: string;
+  numero_economico: string | null;
+  fecha: string;
+  evento: string;
+  cantidad: number | null;
+  unidad: string | null;
+  ubicacion: string | null; // "lat,lng"
+  creado_en: string;
+}
+
+// Fila de GET /api/fuel/rendimiento (último cálculo por unidad)
+export interface FuelRendimiento {
+  idautobus: string;
+  numero_economico: string | null;
+  calculado_en: string;
+  km_ventana: number;
+  rendimiento_km_l: number | null;
+  error_pct: number | null;
+  km: number | null;
+  litros: number | null;
+  puntos: number | null;
+  segmentos: number | null;
+  desde: string | null;
+  hasta: string | null;
+  motivo: string | null;
+  coordenadas_inicio: string | null;
+  coordenadas_fin: string | null;
+}
+
 export interface FuelProcessedQuery {
   limit?: number;
   offset?: number;

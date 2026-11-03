@@ -2,7 +2,9 @@ import axios from 'axios';
 import type {
   ApiResponse,
   Autobus,
+  FuelEvento,
   FuelPoint,
+  FuelRendimiento,
   FuelProcessedRecord,
   FuelProcessedQuery,
   PagedResponse,
@@ -103,6 +105,16 @@ function normalizeRecord(r: any) {
 export async function getRecords(params?: ImeiParams & { limit?: number }) {
   const { data } = await api.get<ApiResponse<any[]>>('/records', { params });
   return data.data.map(normalizeRecord);
+}
+
+export async function getFuelEventos(params?: ImeiParams) {
+  const { data } = await api.get<ApiResponse<FuelEvento[]>>('/fuel/eventos', { params });
+  return data.data;
+}
+
+export async function getFuelRendimiento() {
+  const { data } = await api.get<ApiResponse<FuelRendimiento[]>>('/fuel/rendimiento');
+  return data.data;
 }
 
 export async function getFuelProcessedRecords(params?: FuelProcessedQuery, signal?: AbortSignal) {

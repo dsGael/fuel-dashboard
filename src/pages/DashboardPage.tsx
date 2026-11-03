@@ -2,7 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useVehicleSelection } from '../context/VehicleSelectionContext';
 import RecordsTable from '../components/table/RecordsTable';
-import { getRecords } from '../api/client';
+import { getFuelEventos, getFuelRendimiento, getRecords } from '../api/client';
+import { FuelEventosTable } from '../components/table/FuelEventosTable';
+import { RendimientoCards } from '../components/charts/RendimientoCards';
 import { ConsumptionChartCard } from '../components/charts/ConsumptionChartCard';
 import { useConsumption, useFuelProcessedChart } from '../hooks/useConsumption';
 import { VehicleSelector } from '../components/controls/VehicleSelector';
@@ -15,7 +17,11 @@ import { useFuelProcessed } from '../hooks/useFuelProcessed';
 const PAGE_SIZE = 50;
 
 export function DashboardPage() {
-   const { selectedImei } = useVehicleSelection();
+   const { selectedImei, autobuses } = useVehicleSelection();
+   // eventos y rendimiento vienen por idautobus, no por imei
+   const selectedIdAutobus = autobuses.find((a) => a.imei === selectedImei)?.idautobus;
+   const matchesVehicle = (r: { idautobus: string }) =>
+     !selectedImei || String(selectedIdAutobus) === r.idautobus;
 
 const [dateRange, setDateRange] = useState(() => {
     const hoy = new Date();
@@ -46,6 +52,18 @@ const { data: consumption = [],
     queryKey: ['gps_records', selectedImei, startDateTime, endDateTime],
     queryFn: () => getRecords({ limit: 2000, imei: selectedImei, startDate: startDateTime, endDate: endDateTime }),
     refetchInterval: 30000,
+  });
+
+  const { data: eventos = [], isFetching: isLoadingEventos, error: errorEventos } = useQuery({
+    queryKey: ['fuel_eventos', selectedImei, startDateTime, endDateTime],
+    queryFn: () => getFuelEventos({ imei: selectedImei, startDate: startDateTime, endDate: endDateTime }),
+    refetchInterval: 30000,
+  });
+
+  const { data: rendimiento = [], isFetching: isLoadingRendimiento, error: errorRendimiento } = useQuery({
+    queryKey: ['fuel_rendimiento'],
+    queryFn: getFuelRendimiento,
+    refetchInterval: 60000,
   });
 
   const [page, setPage] = useState(0);
@@ -80,7 +98,19 @@ return (
           />
         </div>
       </header>
-     
+
+      <RendimientoCards
+        data={rendimiento.filter(matchesVehicle)}
+        loading={isLoadingRendimiento}
+        error={errorRendimiento instanceof Error ? errorRendimiento.message : null}
+      />
+
+      <FuelEventosTable
+        eventos={eventos.filter(matchesVehicle)}
+        loading={isLoadingEventos}
+        error={errorEventos instanceof Error ? errorEventos.message : null}
+      />
+
            EN LITROS
            {isLoadingFuelProcessed ? (
           <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
