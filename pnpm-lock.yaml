@@ -32,6 +32,9 @@ importers:
       react-leaflet:
         specifier: ^5.0.0
         version: 5.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      react-router:
+        specifier: ^7.18.4
+        version: 7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       recharts:
         specifier: ^3.10.1
         version: 3.10.1(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react-is@19.3.0)(react@19.3.0)(redux@5.0.1)
@@ -787,6 +790,10 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
+    engines: {node: '>=18'}
+
   copy-anything@4.1.5:
     resolution: {integrity: sha512-vePst2VLTSqPglW7Q98VwFpGiGpOHTyXIo81MO5VyLecA5zMbZw/P/V1vmwD1jksa2iJpn/YkDrJ3XhTfzUyhQ==}
     engines: {node: '>=18'}
@@ -1412,6 +1419,16 @@ packages:
       redux:
         optional: true
 
+  react-router@7.18.4:
+    resolution: {integrity: sha512-PUPQcMhMGRAslLcvtlPz/kmzBEWPhLdgLFrL7pLNepBL6dX0lWj4WD2cUYVgYCuT3jxvghYFg81cDTj44DhetQ==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   react@19.3.0:
     resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
     engines: {node: '>=0.10.0'}
@@ -1464,6 +1481,9 @@ packages:
   seroval@1.5.6:
     resolution: {integrity: sha512-rVQVWjjSvlINzaQPZH5JFqsqEsIWdTxY3iJZCnTL/5gQbXIRooVZKI60tVCkOVfzcRPejboxO2t0P89dg5mQaA==}
     engines: {node: '>=10'}
+
+  set-cookie-parser@2.7.3:
+    resolution: {integrity: sha512-irZHtTqurLna57KQG/s+fzOwv/J6XSH4cs8M/vsrY3uCaQ3S6+QJguAH0WdN47SXlk82voMZ4naWMQf8fdEoIg==}
 
   shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
@@ -2332,6 +2352,8 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
+  cookie@1.1.1: {}
+
   copy-anything@4.1.5: {}
 
   cross-spawn@7.0.6:
@@ -2859,6 +2881,14 @@ snapshots:
       '@types/react': 19.3.0
       redux: 5.0.1
 
+  react-router@7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+    dependencies:
+      cookie: 1.1.1
+      react: 19.3.0
+      set-cookie-parser: 2.7.3
+    optionalDependencies:
+      react-dom: 19.3.0(react@19.3.0)
+
   react@19.3.0: {}
 
   recharts@3.10.1(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react-is@19.3.0)(react@19.3.0)(redux@5.0.1):
@@ -2923,6 +2953,8 @@ snapshots:
       seroval: 1.5.6
 
   seroval@1.5.6: {}
+
+  set-cookie-parser@2.7.3: {}
 
   shebang-command@2.0.0:
     dependencies:

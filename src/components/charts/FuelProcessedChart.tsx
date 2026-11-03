@@ -111,7 +111,7 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: R
 
   return (
     <Card title="Litros por ventana">
-      {/* debounce > duración de la animación de la sidebar (200 ms): redibuja una sola vez al terminar */}
+      {/* debounce > duración de la animación de la sidebar (500 ms): redibuja una sola vez al terminar */}
       <ResponsiveContainer width="100%" height={280} debounce={500}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#232A3B" />
@@ -140,15 +140,24 @@ export function ProcessedChartCard({ data, yMin, yMax, yTicks, selectedImei }: R
             label={{ value: 'Litros', angle: -90, position: 'insideLeft', fill: '#64748B' }}
           />
 
-          <Tooltip
-            contentStyle={{ background: '#161B29', border: '1px solid #232A3B', borderRadius: 8, fontSize: '12px' }}
-            formatter={(value) => (typeof value === 'number' ? `${value.toFixed(2)} L` : value)}
-            labelFormatter={(label) =>
-              label == null
-                ? ''
-                : new Date(String(label)).toLocaleString('es-MX', { timeZone: 'America/Hermosillo' })
-            }
-          />
+<Tooltip
+  contentStyle={{
+    background: 'transparent',
+    border: '1px solid #232A3B',
+    borderRadius: 8,
+    fontSize: '12px',
+    padding: '4px 8px',      // antes 10px
+    lineHeight: 1.2,
+  }}
+  labelStyle={{ marginBottom: 2 }}          // espacio entre la fecha y los valores
+  itemStyle={{ padding: 0, lineHeight: 1.2 }} // quita los 4px arriba/abajo de cada renglón
+  formatter={(value) => (typeof value === 'number' ? `${value.toFixed(2)} L` : value)}
+  labelFormatter={(label) =>
+    label == null
+      ? ''
+      : new Date(String(label)).toLocaleString('es-MX', { timeZone: 'America/Hermosillo' })
+  }
+/>
 
           <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
 

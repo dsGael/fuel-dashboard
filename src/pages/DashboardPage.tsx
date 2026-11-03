@@ -90,6 +90,12 @@ return (
           <ProcessedChartCard data={fuelProcessed} selectedImei={selectedImei} yMax={65} yMin={0} />
         )}
         
+           <RecordsTable 
+        records={records} 
+        loading={isLoadingRecords} 
+        error={errorMessageRecords} 
+      />  
+      
 
          SENSOR CRUDO
              {isLoadingConsumption ? (
@@ -113,11 +119,7 @@ return (
         onRefresh={refetch}
       />
 
-      <RecordsTable 
-        records={records} 
-        loading={isLoadingRecords} 
-        error={errorMessageRecords} 
-      />      
+       
     </div> 
   );
 }

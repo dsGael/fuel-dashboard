@@ -55,9 +55,6 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
               <th className="py-2 pr-4">Ralentí</th>
               <th className="py-2 pr-4">Inclinación (H / V)</th>
               <th className="py-2 pr-4">Sensor Externo</th>
-              <th className="py-2 pr-4">Eje X</th>
-              <th className="py-2 pr-4">Eje Y</th>
-              <th className="py-2 pr-4">Eje Z</th>
               <th className="py-2 pr-4">Maniobra</th>
               <th className="py-2 pr-4">Intensidad</th>
               <th className="py-2 pr-4">Duración</th>
@@ -132,12 +129,7 @@ const RecordsTable: React.FC<RecordsTableProps> = ({ records, loading, error }) 
                   <td className="py-2 pr-4 ">
                     {record.fuel ?? '-'}
                   </td>
-                  {/* Teltonika IO 17/18/19 = eje X/Y/Z */}
-                  {['17', '18', '19'].map((id) => (
-                    <td key={id} className="py-2 pr-4">
-                      {record.io_data?.[id] ?? '-'}
-                    </td>
-                  ))}
+              
                   {/* Teltonika IO 253 = maniobra, 254 = intensidad (centésimas de g), 243 = duración (ms) */}
                   <td className="py-2 pr-4 text-center">
                     {record.io_data?.['253'] != null
