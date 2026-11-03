@@ -16,7 +16,7 @@ export function FuelEventosTable({ eventos, loading, error }: Readonly<FuelEvent
     <Card title="Eventos">
       {error && <div className="mb-2 text-[13px] text-accent-red">{error}</div>}
 
-      <div className={`overflow-auto max-h-105 ${loading ? 'opacity-60' : ''}`}>
+      <div className={`overflow-auto max-h-50 ${loading ? 'opacity-60' : ''}`}>
         <table className="w-full border-collapse text-xs text-slate-200">
           <thead>
             <tr>
