@@ -5,6 +5,8 @@ import RecordsTable from '../components/table/RecordsTable';
 import { getFuelEventos, getFuelRendimiento, getRecords } from '../api/client';
 import { FuelEventosTable } from '../components/table/FuelEventosTable';
 import { RendimientoCards } from '../components/charts/RendimientoCards';
+import { NivelCombustibleCard } from '../components/charts/NivelCombustibleCard';
+import { CombustibleGastadoCard } from '../components/charts/CombustibleGastadoCard';
 import { ConsumptionChartCard } from '../components/charts/ConsumptionChartCard';
 import { useConsumption, useFuelProcessedChart } from '../hooks/useConsumption';
 import { VehicleSelector } from '../components/controls/VehicleSelector';
@@ -99,11 +101,20 @@ return (
         </div>
       </header>
 
-      <RendimientoCards
-        data={rendimiento.filter(matchesVehicle)}
-        loading={isLoadingRendimiento}
-        error={errorRendimiento instanceof Error ? errorRendimiento.message : null}
-      />
+      <div className="flex flex-wrap gap-6">
+        <RendimientoCards
+          data={rendimiento.filter(matchesVehicle)}
+          loading={isLoadingRendimiento}
+          error={errorRendimiento instanceof Error ? errorRendimiento.message : null}
+        />
+        <NivelCombustibleCard data={fuelProcessed} loading={isLoadingFuelProcessed}>
+          <CombustibleGastadoCard
+            data={fuelProcessed}
+            eventos={eventos.filter(matchesVehicle)}
+            loading={isLoadingFuelProcessed || isLoadingEventos}
+          />
+        </NivelCombustibleCard>
+      </div>
 
       <FuelEventosTable
         eventos={eventos.filter(matchesVehicle)}
@@ -117,7 +128,7 @@ return (
             <span className="text-sm text-slate-500">Cargando niveles de combustible...</span>
           </div>
         ) : (
-          <ProcessedChartCard data={fuelProcessed} selectedImei={selectedImei} yMax={65} yMin={0} />
+          <ProcessedChartCard data={fuelProcessed} selectedImei={selectedImei} yMax={90} yMin={0} />
         )}
         
            <RecordsTable 
