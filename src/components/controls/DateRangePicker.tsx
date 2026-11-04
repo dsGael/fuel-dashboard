@@ -34,21 +34,21 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ startDate, end
   return (
     <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-4">
       <div className="flex flex-col">
-        <label className="text-xs text-slate-400 mb-1">Fecha inicio</label>
+        <label className="text-xs text-slate-400 mb-1">Desde</label>
         <input 
-          type="date" 
+          type="datetime-local" 
           value={localStart}
           onChange={(e) => setLocalStart(e.target.value)}
-          className="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+          className="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 w-52"
         />
       </div>
       <div className="flex flex-col">
-        <label className="text-xs text-slate-400 mb-1">Fecha fin</label>
+        <label className="text-xs text-slate-400 mb-1">Hasta</label>
         <input 
-          type="date" 
+          type="datetime-local" 
           value={localEnd}
           onChange={(e) => setLocalEnd(e.target.value)}
-          className="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+          className="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 w-52"
         />
       </div>
       <button 

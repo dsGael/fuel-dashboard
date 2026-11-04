@@ -1,5 +1,6 @@
 import { Card } from '../ui/Card';
 import type { FuelRendimiento } from '../../types';
+import { Engine } from 'lucide-react';
 
 interface RendimientoCardsProps {
   data: FuelRendimiento[];
@@ -26,9 +27,13 @@ export function RendimientoCards({ data, loading, error }: Readonly<RendimientoC
               <span className="text-[12px] text-slate-300">Calculado {fmtDate(r.calculado_en)}</span>
             </div>
 
-            <div>
-              <span className="text-4xl font-semibold text-accent-orange">{fmtNum(r.rendimiento_km_l)}</span>
-              <span className="ml-1 text-xl text-slate-400">km/L</span>
+            <div className="flex items-center gap-4">
+                <Engine className="h-10 w-8 shrink-0" />
+              <span className="text-4xl font-semibold text-accent-orange">{fmtNum(r.rendimiento_km_l)}
+                <span className="ml-1 text-xl text-slate-400">km/L</span>
+
+              </span>
+              
               {r.error_pct !== null && <span className="ml-2 text-xs text-slate-500">±{fmtNum(r.error_pct)}%</span>}
             </div>
 

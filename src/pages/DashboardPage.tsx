@@ -6,7 +6,6 @@ import { getFuelEventos, getFuelRendimiento, getRecords } from '../api/client';
 import { FuelEventosTable } from '../components/table/FuelEventosTable';
 import { RendimientoCards } from '../components/charts/RendimientoCards';
 import { NivelCombustibleCard } from '../components/charts/NivelCombustibleCard';
-import { CombustibleGastadoCard } from '../components/charts/CombustibleGastadoCard';
 import { ConsumptionChartCard } from '../components/charts/ConsumptionChartCard';
 import { useConsumption, useFuelProcessedChart } from '../hooks/useConsumption';
 import { VehicleSelector } from '../components/controls/VehicleSelector';
@@ -30,13 +29,14 @@ const [dateRange, setDateRange] = useState(() => {
     const hoyString = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().split('T')[0];
     
     return {
-      start: hoyString,
-      end: hoyString 
+      start: `${hoyString}T00:00`,
+      end: `${hoyString}T23:59`
     };
     });
 
-  const startDateTime = `${dateRange.start}T00:00:00.000`;
-  const endDateTime = `${dateRange.end}T23:59:59.999`;
+  // datetime-local da YYYY-MM-DDTHH:mm; el fin incluye todo el minuto elegido
+  const startDateTime = `${dateRange.start}:00.000`;
+  const endDateTime = `${dateRange.end}:59.999`;
   
 const { data: consumption = [],
    isLoading: isLoadingConsumption } = useConsumption(selectedImei, startDateTime, endDateTime);
@@ -107,13 +107,11 @@ return (
           loading={isLoadingRendimiento}
           error={errorRendimiento instanceof Error ? errorRendimiento.message : null}
         />
-        <NivelCombustibleCard data={fuelProcessed} loading={isLoadingFuelProcessed}>
-          <CombustibleGastadoCard
-            data={fuelProcessed}
-            eventos={eventos.filter(matchesVehicle)}
-            loading={isLoadingFuelProcessed || isLoadingEventos}
-          />
-        </NivelCombustibleCard>
+        <NivelCombustibleCard
+          data={fuelProcessed}
+          eventos={eventos.filter(matchesVehicle)}
+          loading={isLoadingFuelProcessed || isLoadingEventos}
+        />
       </div>
 
       <FuelEventosTable
