@@ -15,6 +15,7 @@ interface Resumen {
   fin: ProcessedPoint;
   cargas: number;
   extracciones: number;
+  litrosExtraidos: number;
 }
 
 const TZ = 'America/Hermosillo';
@@ -35,6 +36,7 @@ export function NivelCombustibleCard({ data, eventos, loading }: Readonly<NivelC
         fin: p,
         cargas: 0,
         extracciones: 0,
+        litrosExtraidos: 0,
       };
       return;
     }
@@ -46,7 +48,10 @@ export function NivelCombustibleCard({ data, eventos, loading }: Readonly<NivelC
     const r = porUnidad[String(e.idautobus)];
     if (!r) return;
     if (e.evento === 'carga') r.cargas += Number(e.cantidad ?? 0);
-    else if (e.evento === 'extraccion') r.extracciones += 1;
+    else if (e.evento === 'extraccion') {
+      r.extracciones += 1;
+      r.litrosExtraidos += Number(e.cantidad ?? 0);
+    }
   });
 
   const items = Object.values(porUnidad);
@@ -80,6 +85,7 @@ export function NivelCombustibleCard({ data, eventos, loading }: Readonly<NivelC
                 <p className="flex items-center gap-1 text-xs font-medium text-accent-red">
                   <AlertTriangle className="h-4 w-4 shrink-0" />
                   {r.extracciones === 1 ? 'Extracción detectada' : `${r.extracciones} extracciones detectadas`}
+                  {r.litrosExtraidos > 0 && `: ${fmt(r.litrosExtraidos)} L`}
                 </p>
               )}
 

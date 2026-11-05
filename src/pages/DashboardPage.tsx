@@ -7,6 +7,8 @@ import { FuelEventosTable } from '../components/table/FuelEventosTable';
 import { RendimientoCards } from '../components/charts/RendimientoCards';
 import { NivelCombustibleCard } from '../components/charts/NivelCombustibleCard';
 import { ConsumptionChartCard } from '../components/charts/ConsumptionChartCard';
+import { VoltajeChartCard } from '../components/charts/VoltajeChartCard';
+import { VoltajeMinimoCard } from '../components/charts/VoltajeMinimoCard';
 import { useConsumption, useFuelProcessedChart } from '../hooks/useConsumption';
 import { VehicleSelector } from '../components/controls/VehicleSelector';
 import { DateRangePicker } from '../components/controls/DateRangePicker';
@@ -124,6 +126,7 @@ return (
           eventos={eventos.filter(matchesVehicle)}
           loading={isLoadingFuelProcessed || isLoadingEventos}
         />
+        <VoltajeMinimoCard data={records} loading={isLoadingRecords} />
       </div>
 
       <FuelEventosTable
@@ -144,8 +147,17 @@ return (
            <RecordsTable 
         records={records} 
         loading={isLoadingRecords} 
-        error={errorMessageRecords} 
-      />  
+        error={errorMessageRecords}
+      />
+
+      {/* isFetching se activa en cada refetch de 30 s; solo mostramos carga si aún no hay datos */}
+      {isLoadingRecords && records.length === 0 ? (
+        <div className="flex items-center justify-center h-85 rounded-2xl bg-slate-800/20 border border-border">
+          <span className="text-sm text-slate-500">Cargando voltaje...</span>
+        </div>
+      ) : (
+        <VoltajeChartCard data={records} yMin={5} yMax={20} />
+      )}
       
 
          SENSOR CRUDO
