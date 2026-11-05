@@ -9,23 +9,20 @@ interface RendimientoCardsProps {
 }
 
 const TZ = 'America/Hermosillo';
-const fmtDate = (v: string | null) =>
+const fmtDate = (v?: string | null) =>
   v ? new Date(v).toLocaleString('es-MX', { timeZone: TZ, dateStyle: 'short', timeStyle: 'short' }) : '—';
-const fmtNum = (v: number | null) => (v === null ? '—' : v.toLocaleString('es-MX', { maximumFractionDigits: 2 }));
+const fmtNum = (v?: number | null) => (v == null ? '—' : v.toLocaleString('es-MX', { maximumFractionDigits: 2 }));
 
 export function RendimientoCards({ data, loading, error }: Readonly<RendimientoCardsProps>) {
   return (
     <Card title="Rendimiento (km/L)" className="w-fit">
       {error && <div className="mb-2 text-[13px] text-accent-red">{error}</div>}
-      {!loading && !error && data.length === 0 && <p className="text-sm text-slate-500">Sin cálculos de rendimiento</p>}
+      {!loading && !error && data.length === 0 && <p className="text-sm text-slate-500">Sin rendimiento en este rango</p>}
 
       <div className={`flex w-fit gap-5  ${loading ? 'opacity-70' : ''}`}>
         {data.map((r) => (
           <div key={r.idautobus} className="rounded-lg border border-border p-4 space-y-3">
-            <div className="flex items-baseline justify-between">
-              <span className="text-md font-medium text-slate-200">{r.numero_economico ?? r.idautobus}</span>
-              <span className="text-[12px] text-slate-300">Calculado {fmtDate(r.calculado_en)}</span>
-            </div>
+            <span className="text-md font-medium text-slate-200">{r.numero_economico ?? r.idautobus}</span>
 
             <div className="flex items-center gap-4">
                 <Engine className="h-10 w-8 shrink-0" />
@@ -33,20 +30,25 @@ export function RendimientoCards({ data, loading, error }: Readonly<RendimientoC
                 <span className="ml-1 text-xl text-slate-400">km/L</span>
 
               </span>
-              
-              {r.error_pct !== null && <span className="ml-2 text-xs text-slate-500">±{fmtNum(r.error_pct)}%</span>}
+              {r.error_pct != null && <span className="text-xs text-slate-500">±{fmtNum(r.error_pct)}%</span>}
             </div>
 
-            {r.motivo && <p className="text-xs text-amber-400">{r.motivo}</p>}
+            {r.motivo && (
+              <p className={`text-xs ${r.confiable ? 'text-slate-400' : 'text-amber-400'}`}>{r.motivo}</p>
+            )}
 
             <dl className="grid grid-cols-2  gap-y-1 text-md">
               <dt className="text-slate-100">Km</dt>
               <dd className="text-right text-slate-100">{fmtNum(r.km)}</dd>
-              <dt className="text-slate-100">Litros</dt>
+              <dt className="text-slate-100">Litros consumidos</dt>
               <dd className="text-right text-slate-100">{fmtNum(r.litros)}</dd>
-              <dt className="text-slate-100">Puntos / segmentos</dt>
-              <dd className="text-right text-slate-210">
-                {fmtNum(r.puntos)} / {fmtNum(r.segmentos)}
+              <dt className="text-slate-100">Nivel inicio / fin</dt>
+              <dd className="text-right text-slate-100">
+                {fmtNum(r.nivel_inicio)} / {fmtNum(r.nivel_fin)} L
+              </dd>
+              <dt className="text-slate-100">Cargado / extraído</dt>
+              <dd className="text-right text-slate-100">
+                {fmtNum(r.cargado)} / {fmtNum(r.extraido)} L
               </dd>
               <dt className="text-slate-100">Desde</dt>
               <dd className="text-right text-slate-100">{fmtDate(r.desde)}</dd>

@@ -93,23 +93,23 @@ export interface FuelEvento {
   creado_en: string;
 }
 
-// Fila de GET /api/fuel/rendimiento (último cálculo por unidad)
+// GET /api/fuel/rendimiento/rango (balance de combustible de una unidad en el rango).
+// Sin ventanas en el rango solo llegan idautobus, rendimiento_km_l, confiable y motivo.
 export interface FuelRendimiento {
   idautobus: string;
-  numero_economico: string | null;
-  calculado_en: string;
-  km_ventana: number;
+  numero_economico?: string | number | null; // lo agrega el cliente desde la lista de autobuses
   rendimiento_km_l: number | null;
-  error_pct: number | null;
-  km: number | null;
-  litros: number | null;
-  puntos: number | null;
-  segmentos: number | null;
-  desde: string | null;
-  hasta: string | null;
+  error_pct?: number | null;
+  confiable: boolean;
   motivo: string | null;
-  coordenadas_inicio: string | null;
-  coordenadas_fin: string | null;
+  km?: number;
+  litros?: number;
+  nivel_inicio?: number;
+  nivel_fin?: number;
+  cargado?: number;
+  extraido?: number;
+  desde?: string;
+  hasta?: string;
 }
 
 export interface FuelProcessedQuery {

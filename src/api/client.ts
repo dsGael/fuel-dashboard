@@ -112,8 +112,8 @@ export async function getFuelEventos(params?: ImeiParams) {
   return data.data;
 }
 
-export async function getFuelRendimiento() {
-  const { data } = await api.get<ApiResponse<FuelRendimiento[]>>('/fuel/rendimiento');
+export async function getFuelRendimiento(params: RangeParams & { idautobus: number }) {
+  const { data } = await api.get<ApiResponse<FuelRendimiento>>('/fuel/rendimiento/rango', { params });
   return data.data;
 }
 

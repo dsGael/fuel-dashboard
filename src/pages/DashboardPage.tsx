@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useVehicleSelection } from '../context/VehicleSelectionContext';
 import RecordsTable from '../components/table/RecordsTable';
@@ -18,7 +18,7 @@ import { useFuelProcessed } from '../hooks/useFuelProcessed';
 const PAGE_SIZE = 50;
 
 export function DashboardPage() {
-   const { selectedImei, autobuses } = useVehicleSelection();
+   const { selectedImei, autobuses, loading: loadingAutobuses } = useVehicleSelection();
    // eventos y rendimiento vienen por idautobus, no por imei
    const selectedIdAutobus = autobuses.find((a) => a.imei === selectedImei)?.idautobus;
    const matchesVehicle = (r: { idautobus: string }) =>
@@ -62,11 +62,23 @@ const { data: consumption = [],
     refetchInterval: 30000,
   });
 
-  const { data: rendimiento = [], isFetching: isLoadingRendimiento, error: errorRendimiento } = useQuery({
-    queryKey: ['fuel_rendimiento'],
-    queryFn: getFuelRendimiento,
-    refetchInterval: 60000,
+  // /rendimiento/rango exige idautobus: una consulta por unidad mostrada
+  const rendimientoQueries = useQueries({
+    queries: autobuses
+      .filter((a) => !selectedImei || a.imei === selectedImei)
+      .map((a) => ({
+        queryKey: ['fuel_rendimiento', a.idautobus, startDateTime, endDateTime],
+        queryFn: () =>
+          getFuelRendimiento({ idautobus: a.idautobus, startDate: startDateTime, endDate: endDateTime }).then((r) => ({
+            ...r,
+            numero_economico: a.numero_economico,
+          })),
+        refetchInterval: 60000,
+      })),
   });
+  const rendimiento = rendimientoQueries.flatMap((q) => (q.data ? [q.data] : []));
+  const isLoadingRendimiento = loadingAutobuses || rendimientoQueries.some((q) => q.isFetching);
+  const errorRendimiento = rendimientoQueries.find((q) => q.error)?.error;
 
   const [page, setPage] = useState(0);
   const [prevImei, setPrevImei] = useState(selectedImei);
@@ -103,7 +115,7 @@ return (
 
       <div className="flex flex-wrap gap-6">
         <RendimientoCards
-          data={rendimiento.filter(matchesVehicle)}
+          data={rendimiento}
           loading={isLoadingRendimiento}
           error={errorRendimiento instanceof Error ? errorRendimiento.message : null}
         />
