@@ -36,7 +36,8 @@ export function AppLayout() {
         onToggleCollapsed={toggleCollapsed}
       />
 
-      <div className="flex-1 min-w-0 overflow-x-hidden">
+      {/* clip y no hidden: hidden crea un contenedor de scroll y rompe position: sticky en las páginas */}
+      <div className="flex-1 min-w-0 overflow-x-clip">
         <div className="lg:hidden flex items-center h-14 px-4 border-b border-border bg-card">
           <button
             onClick={() => setSidebarOpen(true)}

@@ -99,7 +99,7 @@ const { data: consumption = [],
   const errorMessageRecords = errorRecords instanceof Error ? errorRecords.message : null;
 return (
     <div className="p-6 space-y-6">
-      <header className="flex items-center justify-between flex-wrap gap-4">
+      <header className="sticky top-0 z-20 -mx-6 -mt-6 px-6 py-4 bg-surface border-b border-border flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard General</h1>
           <p className="text-sm text-slate-400">Resumen de tu flota</p>
@@ -156,7 +156,7 @@ return (
           <span className="text-sm text-slate-500">Cargando voltaje...</span>
         </div>
       ) : (
-        <VoltajeChartCard data={records} yMin={5} yMax={20} />
+        <VoltajeChartCard data={records} selectedImei={selectedImei} yMin={5} yMax={20} />
       )}
       
 

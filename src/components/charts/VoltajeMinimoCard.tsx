@@ -15,8 +15,12 @@ const fmt = (v: number) => v.toLocaleString('es-MX', { maximumFractionDigits: 2 
 export function VoltajeMinimoCard({ data, loading }: Readonly<VoltajeMinimoCardProps>) {
   // Registro con el voltaje más bajo del rango, por unidad
   const minimos: Record<string, GpsRecord> = {};
+  const sumas: Record<string, { total: number; n: number }> = {};
   data.forEach((r) => {
     if (r.voltaje == null) return;
+    sumas[r.imei] ??= { total: 0, n: 0 };
+    sumas[r.imei].total += Number(r.voltaje);
+    sumas[r.imei].n += 1;
     const actual = minimos[r.imei];
     if (!actual || Number(r.voltaje) < Number(actual.voltaje)) minimos[r.imei] = r;
   });
@@ -44,6 +48,10 @@ export function VoltajeMinimoCard({ data, loading }: Readonly<VoltajeMinimoCardP
               </div>
 
               <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-md">
+                <dt className="text-slate-100">Promedio</dt>
+                <dd className="text-right text-slate-100">
+                  {fmt(sumas[r.imei].total / sumas[r.imei].n / 1000)} V
+                </dd>
                 <dt className="text-slate-100">Fecha</dt>
                 <dd className="text-right text-slate-100">{fmtDate(r.recorded_at)}</dd>
                 <dt className="text-slate-100">Ubicación</dt>
