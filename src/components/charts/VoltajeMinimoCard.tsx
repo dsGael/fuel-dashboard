@@ -1,4 +1,4 @@
-import { Battery, BatteryCharging, BatteryLow } from 'lucide-react';
+import { Battery } from 'lucide-react';
 import { Card } from '../ui/Card';
 import type { GpsRecord } from '../../types';
 
